@@ -203,14 +203,13 @@ var C = function(a, str){
     this.a = a;
     this.str = str;
 };
-var dFactory = {
-    'someValue' : 'I\'m manufactured',
-    'factoryMethod' : function(a){
-        return {
-            'a' : a,
-            'message' : this.someValue
-        };
-    }
+var Factory = function(message){
+    this.factoryMethod = function(a){
+         return {
+             'a' : a,
+             'message' : message
+         };
+     }
 };
 var F = function(){};
 
@@ -244,10 +243,21 @@ var definitions = {
             {'value' : 'I\'m an entity!'}
         ]
     },
+    // Another singleton, to be used later as
+    // a factory
+    'factory' : {
+        'ctor' : Factory,
+        'ctorArgs' : [
+            {'value' : 'I\'m manufactured!'}
+        ]
+    },
     // A singleton constructed by a factory.
+    // the factory context is a string which
+    // references an entity, but it could also
+    // be a reference to an object
     'd' : {
         'factory' : {
-            'context' : dFactory,
+            'context' : 'factory',
             'method' : 'factoryMethod',
             'args' : [
                 {'entity': 'a'}
@@ -440,7 +450,7 @@ var f = hypo.getEntity('f');
             
         
         
-        <a href="..&#x2F;files&#x2F;lib_hypo.js.html#l223"><code>lib\hypo.js:223</code></a>
+        <a href="..&#x2F;files&#x2F;lib_hypo.js.html#l243"><code>lib\hypo.js:243</code></a>
         
         </p>
 
@@ -564,7 +574,7 @@ values.</p>
             
         
         
-        <a href="..&#x2F;files&#x2F;lib_hypo.js.html#l174"><code>lib\hypo.js:174</code></a>
+        <a href="..&#x2F;files&#x2F;lib_hypo.js.html#l187"><code>lib\hypo.js:187</code></a>
         
         </p>
 
@@ -695,7 +705,7 @@ used when applying factory methods.</p>
             
         
         
-        <a href="..&#x2F;files&#x2F;lib_hypo.js.html#l117"><code>lib\hypo.js:117</code></a>
+        <a href="..&#x2F;files&#x2F;lib_hypo.js.html#l127"><code>lib\hypo.js:127</code></a>
         
         </p>
 
@@ -777,7 +787,7 @@ not need to be called again.</p>
             
         
         
-        <a href="..&#x2F;files&#x2F;lib_hypo.js.html#l134"><code>lib\hypo.js:134</code></a>
+        <a href="..&#x2F;files&#x2F;lib_hypo.js.html#l144"><code>lib\hypo.js:144</code></a>
         
         </p>
 
@@ -887,7 +897,7 @@ corresponding with the passed name.
             
         
         
-        <a href="..&#x2F;files&#x2F;lib_hypo.js.html#l287"><code>lib\hypo.js:287</code></a>
+        <a href="..&#x2F;files&#x2F;lib_hypo.js.html#l307"><code>lib\hypo.js:307</code></a>
         
         </p>
 
@@ -992,7 +1002,7 @@ any parent definitions.</p>
             
         
         
-        <a href="..&#x2F;files&#x2F;lib_hypo.js.html#l240"><code>lib\hypo.js:240</code></a>
+        <a href="..&#x2F;files&#x2F;lib_hypo.js.html#l260"><code>lib\hypo.js:260</code></a>
         
         </p>
 
@@ -1111,7 +1121,7 @@ instance.</p>
             
         
         
-        <a href="..&#x2F;files&#x2F;lib_hypo.js.html#l99"><code>lib\hypo.js:99</code></a>
+        <a href="..&#x2F;files&#x2F;lib_hypo.js.html#l109"><code>lib\hypo.js:109</code></a>
         
         </p>
 
@@ -1155,7 +1165,7 @@ instance.</p>
             
         
         
-        <a href="..&#x2F;files&#x2F;lib_hypo.js.html#l106"><code>lib\hypo.js:106</code></a>
+        <a href="..&#x2F;files&#x2F;lib_hypo.js.html#l116"><code>lib\hypo.js:116</code></a>
         
         </p>
 

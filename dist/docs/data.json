@@ -37,14 +37,14 @@
                 }
             ],
             "example": [
-                "\n\n    var A = function(){};\n    var B = function(){};\n    var C = function(a, str){\n        this.a = a;\n        this.str = str;\n    };\n    var dFactory = {\n        'someValue' : 'I\\'m manufactured',\n        'factoryMethod' : function(a){\n            return {\n                'a' : a,\n                'message' : this.someValue\n            };\n        }\n    };\n    var F = function(){};\n    \n    var definitions = {\n        // Transient entity with no dependencies\n        'a' : {\n            'transient' : true,\n            'ctor' : A\n        },\n        // A singleton entity with three injected\n        // dependencies: the hypo instance, an entity,\n        // and a plain object\n        'b' : {\n            'ctor' : B,\n            'props' : {\n                'hypo' : {'hypo' : true},\n                'a' : {'entity' : 'a'},\n                'obj' : {'value' : {\n                    'num' : 1\n                }}\n            }\n        },\n        // A lazy singleton entity with two injected\n        // constructor arguments: an entity, and a\n        // simple value.\n        'c' : {\n            'lazy' : true,\n            'ctor' : C,\n            'ctorArgs' : [\n                {'entity' : 'd'},\n                {'value' : 'I\\'m an entity!'}\n            ]\n        },\n        // A singleton constructed by a factory.\n        'd' : {\n            'factory' : {\n                'context' : dFactory,\n                'method' : 'factoryMethod',\n                'args' : [\n                    {'entity': 'a'}\n                ]\n            }\n        },\n        // An abstract entity.  Abstract entities\n        // cannot be instantiated, and serve as\n        // parents for concrete entities\n        'e' : {\n            'abstract' : true,\n            'props' : {\n                'a' : {'entity' : 'a'}\n            }\n        },\n        // An entity with a parent entity.  In this\n        // case the parent is an abstract entity, but\n        // this doesn't necessarily have to be the case.\n        'f' : {\n            'ctor' : F,\n            'parent' : 'e'\n        }\n    };\n\n    var hypo = new Hypo(definitions);\n    \n    var a = hypo.getEntity('a');\n    var b = hypo.getEntity('b');\n    var c = hypo.getEntity('c');\n    var d = hypo.getEntity('d');\n    var f = hypo.getEntity('f');"
+                "\n\n    var A = function(){};\n    var B = function(){};\n    var C = function(a, str){\n        this.a = a;\n        this.str = str;\n    };\n    var Factory = function(message){\n        this.factoryMethod = function(a){\n             return {\n                 'a' : a,\n                 'message' : message\n             };\n         }\n    };\n    var F = function(){};\n    \n    var definitions = {\n        // Transient entity with no dependencies\n        'a' : {\n            'transient' : true,\n            'ctor' : A\n        },\n        // A singleton entity with three injected\n        // dependencies: the hypo instance, an entity,\n        // and a plain object\n        'b' : {\n            'ctor' : B,\n            'props' : {\n                'hypo' : {'hypo' : true},\n                'a' : {'entity' : 'a'},\n                'obj' : {'value' : {\n                    'num' : 1\n                }}\n            }\n        },\n        // A lazy singleton entity with two injected\n        // constructor arguments: an entity, and a\n        // simple value.\n        'c' : {\n            'lazy' : true,\n            'ctor' : C,\n            'ctorArgs' : [\n                {'entity' : 'd'},\n                {'value' : 'I\\'m an entity!'}\n            ]\n        },\n        // Another singleton, to be used later as\n        // a factory\n        'factory' : {\n            'ctor' : Factory,\n            'ctorArgs' : [\n                {'value' : 'I\\'m manufactured!'}\n            ]\n        },\n        // A singleton constructed by a factory.\n        // the factory context is a string which\n        // references an entity, but it could also\n        // be a reference to an object\n        'd' : {\n            'factory' : {\n                'context' : 'factory',\n                'method' : 'factoryMethod',\n                'args' : [\n                    {'entity': 'a'}\n                ]\n            }\n        },\n        // An abstract entity.  Abstract entities\n        // cannot be instantiated, and serve as\n        // parents for concrete entities\n        'e' : {\n            'abstract' : true,\n            'props' : {\n                'a' : {'entity' : 'a'}\n            }\n        },\n        // An entity with a parent entity.  In this\n        // case the parent is an abstract entity, but\n        // this doesn't necessarily have to be the case.\n        'f' : {\n            'ctor' : F,\n            'parent' : 'e'\n        }\n    };\n\n    var hypo = new Hypo(definitions);\n    \n    var a = hypo.getEntity('a');\n    var b = hypo.getEntity('b');\n    var c = hypo.getEntity('c');\n    var d = hypo.getEntity('d');\n    var f = hypo.getEntity('f');"
             ]
         }
     },
     "classitems": [
         {
             "file": "lib\\hypo.js",
-            "line": 99,
+            "line": 109,
             "description": "The entity definition object for this Hypo instance.",
             "itemtype": "property",
             "name": "definitions",
@@ -53,7 +53,7 @@
         },
         {
             "file": "lib\\hypo.js",
-            "line": 106,
+            "line": 116,
             "description": "A map of all singleton entities managed by this instance.",
             "itemtype": "property",
             "name": "singletonMap",
@@ -62,7 +62,7 @@
         },
         {
             "file": "lib\\hypo.js",
-            "line": 117,
+            "line": 127,
             "description": "Generates the non-lazy singleton entities managed by this instance.\nThis method is called when the hypo instance is constructed, and does\nnot need to be called again.",
             "itemtype": "method",
             "name": "generateSingletons",
@@ -74,7 +74,7 @@
         },
         {
             "file": "lib\\hypo.js",
-            "line": 134,
+            "line": 144,
             "description": "The method for retrieving entities.  If an entity is a singleton\nand not particularly lazy, it will have been created along with\nthe Hypo instance.  Otherwise, it will be created the first time\nit is requested in the case of lazy singletons, and each time in\nthe case of transient entities.",
             "itemtype": "method",
             "name": "getEntity",
@@ -93,7 +93,7 @@
         },
         {
             "file": "lib\\hypo.js",
-            "line": 174,
+            "line": 187,
             "description": "Creates a new object using the passed constructor function and\nargument property definitions.  See parseProperty for a description\nof appropriate Hypo property definitions.",
             "itemtype": "method",
             "name": "createEntity",
@@ -123,7 +123,7 @@
         },
         {
             "file": "lib\\hypo.js",
-            "line": 223,
+            "line": 243,
             "description": "Applies properties to an entity instance based on the passed set of\nproperty definitions.  See parseProperty for a description of\nappropriate Hypo property definitions.",
             "itemtype": "method",
             "name": "applyProperties",
@@ -143,7 +143,7 @@
         },
         {
             "file": "lib\\hypo.js",
-            "line": 240,
+            "line": 260,
             "description": "Parses Hypo property definitions.  These definitions are used for\nconstructor arguments, factory arguments, and property definitions.\nValid property objects are as follows:",
             "example": [
                 "\nPassing an object with a hypo key returns a reference to the Hypo instance\n\n    {\n        hypo : true    \n    }\n      \nPassing an object with an entity key equal to an entity name returns an entity\ninstance.\n\n    {\n        entity : \"entity name\"\n    }\n      \nPassing an object with a key \"value\" returns that value.\n\n    {\n        value : \"object or primitive value\"\n    }\n      \nAny other object configuration will result in an error being thrown."
@@ -164,7 +164,7 @@
         },
         {
             "file": "lib\\hypo.js",
-            "line": 287,
+            "line": 307,
             "description": "Parses the definition for the passed name, including recursing through\nany parent definitions.",
             "itemtype": "method",
             "name": "parseDefinition",

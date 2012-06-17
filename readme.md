@@ -6,14 +6,13 @@ Dependency Injection for JavaScript.  Simple and to the point. Usage:
     var B = function(){};
     var C = function(a, str){
         this.a = a;
-        this.message = message;
+        this.str = str;
     };
-    var dFactory = {
-        'someValue' : 'I\'m manufactured',
-        'factoryMethod' : function(a){
+    var Factory = function(message){
+        this.factoryMethod = function(a){
             return {
                 'a' : a,
-                'message' : this.someValue
+                'message' : message
             };
         }
     };
@@ -49,10 +48,21 @@ Dependency Injection for JavaScript.  Simple and to the point. Usage:
                 {'value' : 'I\'m an entity!'}
             ]
         },
+        // Another singleton, to be used later as
+        // a factory
+        'factory' : {
+            'ctor' : Factory,
+            'ctorArgs' : [
+                {'value' : 'I\'m manufactured!'}
+            ]
+        },
         // A singleton constructed by a factory.
+        // the factory context is a string which
+        // references an entity, but it could also
+        // be a reference to an object
         'd' : {
             'factory' : {
-                'context' : dFactory,
+                'context' : 'factory',
                 'method' : 'factoryMethod',
                 'args' : [
                     {'entity': 'a'}

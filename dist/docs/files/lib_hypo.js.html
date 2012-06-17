@@ -106,14 +106,13 @@
          *         this.a = a;
          *         this.str = str;
          *     };
-         *     var dFactory = {
-         *         &#x27;someValue&#x27; : &#x27;I\&#x27;m manufactured&#x27;,
-         *         &#x27;factoryMethod&#x27; : function(a){
-         *             return {
-         *                 &#x27;a&#x27; : a,
-         *                 &#x27;message&#x27; : this.someValue
-         *             };
-         *         }
+         *     var Factory = function(message){
+         *         this.factoryMethod = function(a){
+         *              return {
+         *                  &#x27;a&#x27; : a,
+         *                  &#x27;message&#x27; : message
+         *              };
+         *          }
          *     };
          *     var F = function(){};
          *     
@@ -147,10 +146,21 @@
          *                 {&#x27;value&#x27; : &#x27;I\&#x27;m an entity!&#x27;}
          *             ]
          *         },
+         *         &#x2F;&#x2F; Another singleton, to be used later as
+         *         &#x2F;&#x2F; a factory
+         *         &#x27;factory&#x27; : {
+         *             &#x27;ctor&#x27; : Factory,
+         *             &#x27;ctorArgs&#x27; : [
+         *                 {&#x27;value&#x27; : &#x27;I\&#x27;m manufactured!&#x27;}
+         *             ]
+         *         },
          *         &#x2F;&#x2F; A singleton constructed by a factory.
+         *         &#x2F;&#x2F; the factory context is a string which
+         *         &#x2F;&#x2F; references an entity, but it could also
+         *         &#x2F;&#x2F; be a reference to an object
          *         &#x27;d&#x27; : {
          *             &#x27;factory&#x27; : {
-         *                 &#x27;context&#x27; : dFactory,
+         *                 &#x27;context&#x27; : &#x27;factory&#x27;,
          *                 &#x27;method&#x27; : &#x27;factoryMethod&#x27;,
          *                 &#x27;args&#x27; : [
          *                     {&#x27;entity&#x27;: &#x27;a&#x27;}
@@ -245,7 +255,10 @@
                         args = def.ctorArgs;
                     }
                     else if(def.factory){
-                        context = def.factory.context;
+                        context =
+                            typeof def.factory.context == &#x27;string&#x27; ?
+                            this.getEntity(def.factory.context) :
+                            def.factory.context;
                         ctor = context[def.factory.method];
                         args = def.factory.args;
                     }
@@ -284,15 +297,22 @@
                     for(i=0; i&lt;argDefs.length; i++){
                         &#x2F;&#x2F; Check for circular dependencies
                         if(argDefs[i].entity){
+                            var depError = new Error(
+                                &#x27;Hypo Error: Circular dependency between &quot;&#x27; +
+                                entityName + &#x27;&quot; and &quot;&#x27; + argDefs[i].entity + &#x27;&quot;.&#x27;
+                            );
+                            if(argDefs[i].entity == entityName)
+                                throw depError;
                             entityDef = this.definitions[argDefs[i].entity];
                             if(entityDef.ctorArgs){
                                 for(var j=0; j&lt;entityDef.ctorArgs.length; j++){
                                     if(entityDef.ctorArgs[j].entity == entityName)
-                                        throw(
-                                            &#x27;Hypo Error: Circular dependency between &quot;&#x27; +
-                                            entityName + &#x27;&quot; and &quot;&#x27; + argDefs[i].entity + &#x27;&quot;.&#x27;
-                                        );
+                                        throw depError;
                                 }
+                            }
+                            if(entityDef.factory){
+                                if(entityDef.factory.context == entityName)
+                                    throw depError;
                             }
                         }
                         args.push(this.parseProperty(argDefs[i]));
@@ -357,10 +377,10 @@
              * @returns An entity, hypo instance, or value based on the passed property 
              **&#x2F;
             parseProperty : function(propDef){
-                var errorMsg = &#x27;Hypo Error: Invalid property or ctor argument definition.&#x27;,
+                var propError = new Error(&#x27;Hypo Error: Invalid property or ctor argument definition.&#x27;),
                 ret;
                 if(!propDef)
-                    throw errorMsg
+                    throw propError
                 if(propDef.hasOwnProperty(&#x27;hypo&#x27;))
                     ret = this;
                 else if(propDef.hasOwnProperty(&#x27;entity&#x27;))
@@ -368,7 +388,7 @@
                 else if(propDef.hasOwnProperty(&#x27;value&#x27;))
                     ret = propDef.value;
                 else
-                    throw errorMsg
+                    throw propError
                     
                 return ret;
             },
