@@ -35,7 +35,6 @@ function compile(){
 function docs(){
 	console.log('Starting YUIDoc');
 	var options = Y.Project.init({configfile:'./yuidoc.json'});
-	console.log(options);
 	var json = (new Y.YUIDoc(options)).run();
 	var builder = new Y.DocBuilder(options, json);
 	builder.compile();
