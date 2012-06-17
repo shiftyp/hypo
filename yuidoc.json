@@ -1,0 +1,9 @@
+{
+    "name": "The Hypo API",
+    "description": "The Hypo API: Dependency injection for JavaScript",
+    "version": "0.1.0",
+    "options": {
+        "paths": ["lib"],
+        "outdir": "dist/docs"
+    }
+}

@@ -1,0 +1,185 @@
+{
+    "project": {
+        "name": "The Hypo API",
+        "description": "The Hypo API: Dependency injection for JavaScript",
+        "version": "0.1.0"
+    },
+    "files": {
+        "lib\\hypo.js": {
+            "name": "lib\\hypo.js",
+            "modules": {},
+            "classes": {
+                "Hypo": 1
+            },
+            "fors": {},
+            "namespaces": {}
+        }
+    },
+    "modules": {},
+    "classes": {
+        "Hypo": {
+            "name": "Hypo",
+            "shortname": "Hypo",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "file": "lib\\hypo.js",
+            "line": 5,
+            "description": "Hypo dependency injection framework constructor.",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "definitions",
+                    "description": "An object that defines the entities\nand their dependencies to be managed by this Hypo instance.",
+                    "type": "Object"
+                }
+            ],
+            "example": [
+                "\n\n    var A = function(){};\n    var B = function(){};\n    var C = function(a, str){\n        this.a = a;\n        this.str = str;\n    };\n    var dFactory = {\n        'someValue' : 'I\\'m manufactured',\n        'factoryMethod' : function(a){\n            return {\n                'a' : a,\n                'message' : this.someValue\n            };\n        }\n    };\n    var F = function(){};\n    \n    var definitions = {\n        // Transient entity with no dependencies\n        'a' : {\n            'transient' : true,\n            'ctor' : A\n        },\n        // A singleton entity with three injected\n        // dependencies: the hypo instance, an entity,\n        // and a plain object\n        'b' : {\n            'ctor' : B,\n            'props' : {\n                'hypo' : {'hypo' : true},\n                'a' : {'entity' : 'a'},\n                'obj' : {'value' : {\n                    'num' : 1\n                }}\n            }\n        },\n        // A lazy singleton entity with two injected\n        // constructor arguments: an entity, and a\n        // simple value.\n        'c' : {\n            'lazy' : true,\n            'ctor' : C,\n            'ctorArgs' : [\n                {'entity' : 'd'},\n                {'value' : 'I\\'m an entity!'}\n            ]\n        },\n        // A singleton constructed by a factory.\n        'd' : {\n            'factory' : {\n                'context' : dFactory,\n                'method' : 'factoryMethod',\n                'args' : [\n                    {'entity': 'a'}\n                ]\n            }\n        },\n        // An abstract entity.  Abstract entities\n        // cannot be instantiated, and serve as\n        // parents for concrete entities\n        'e' : {\n            'abstract' : true,\n            'props' : {\n                'a' : {'entity' : 'a'}\n            }\n        },\n        // An entity with a parent entity.  In this\n        // case the parent is an abstract entity, but\n        // this doesn't necessarily have to be the case.\n        'f' : {\n            'ctor' : F,\n            'parent' : 'e'\n        }\n    };\n\n    var hypo = new Hypo(definitions);\n    \n    var a = hypo.getEntity('a');\n    var b = hypo.getEntity('b');\n    var c = hypo.getEntity('c');\n    var d = hypo.getEntity('d');\n    var f = hypo.getEntity('f');"
+            ]
+        }
+    },
+    "classitems": [
+        {
+            "file": "lib\\hypo.js",
+            "line": 99,
+            "description": "The entity definition object for this Hypo instance.",
+            "itemtype": "property",
+            "name": "definitions",
+            "type": "{object}",
+            "class": "Hypo"
+        },
+        {
+            "file": "lib\\hypo.js",
+            "line": 106,
+            "description": "A map of all singleton entities managed by this instance.",
+            "itemtype": "property",
+            "name": "singletonMap",
+            "type": "{object}",
+            "class": "Hypo"
+        },
+        {
+            "file": "lib\\hypo.js",
+            "line": 117,
+            "description": "Generates the non-lazy singleton entities managed by this instance.\nThis method is called when the hypo instance is constructed, and does\nnot need to be called again.",
+            "itemtype": "method",
+            "name": "generateSingletons",
+            "return": {
+                "description": "",
+                "type": "Void"
+            },
+            "class": "Hypo"
+        },
+        {
+            "file": "lib\\hypo.js",
+            "line": 134,
+            "description": "The method for retrieving entities.  If an entity is a singleton\nand not particularly lazy, it will have been created along with\nthe Hypo instance.  Otherwise, it will be created the first time\nit is requested in the case of lazy singletons, and each time in\nthe case of transient entities.",
+            "itemtype": "method",
+            "name": "getEntity",
+            "params": [
+                {
+                    "name": "name",
+                    "description": "Corresponds to the key in definitions\nrepresenting the entity definition to retieve an instance of.",
+                    "type": "String"
+                }
+            ],
+            "return": {
+                "description": "The entity instance generated from the definition\ncorresponding with the passed name.",
+                "type": "Object"
+            },
+            "class": "Hypo"
+        },
+        {
+            "file": "lib\\hypo.js",
+            "line": 174,
+            "description": "Creates a new object using the passed constructor function and\nargument property definitions.  See parseProperty for a description\nof appropriate Hypo property definitions.",
+            "itemtype": "method",
+            "name": "createEntity",
+            "params": [
+                {
+                    "name": "ctor",
+                    "description": "The constructor function to be\ninvoked with the parsed argument definitions.",
+                    "type": "Function"
+                },
+                {
+                    "name": "argDefs",
+                    "description": "An array of Hypo property definitions",
+                    "type": "Array"
+                },
+                {
+                    "name": "entityName",
+                    "description": "The name of the entity being constructed;\nused to check for circular dependencies.",
+                    "type": "String"
+                },
+                {
+                    "name": "context",
+                    "description": "The context in which to call the constructor;\nused when applying factory methods.",
+                    "type": "Object"
+                }
+            ],
+            "class": "Hypo"
+        },
+        {
+            "file": "lib\\hypo.js",
+            "line": 223,
+            "description": "Applies properties to an entity instance based on the passed set of\nproperty definitions.  See parseProperty for a description of\nappropriate Hypo property definitions.",
+            "itemtype": "method",
+            "name": "applyProperties",
+            "params": [
+                {
+                    "name": "entity",
+                    "description": "An entity instance to apply the parsed properties to.",
+                    "type": "Object"
+                },
+                {
+                    "name": "propertyDefinitions",
+                    "description": "An object with keys corresponding to\nthe properties to be applied to the entity, and Hypo property definition\nvalues.",
+                    "type": "Object"
+                }
+            ],
+            "class": "Hypo"
+        },
+        {
+            "file": "lib\\hypo.js",
+            "line": 240,
+            "description": "Parses Hypo property definitions.  These definitions are used for\nconstructor arguments, factory arguments, and property definitions.\nValid property objects are as follows:",
+            "example": [
+                "\nPassing an object with a hypo key returns a reference to the Hypo instance\n\n    {\n        hypo : true    \n    }\n      \nPassing an object with an entity key equal to an entity name returns an entity\ninstance.\n\n    {\n        entity : \"entity name\"\n    }\n      \nPassing an object with a key \"value\" returns that value.\n\n    {\n        value : \"object or primitive value\"\n    }\n      \nAny other object configuration will result in an error being thrown."
+            ],
+            "itemtype": "method",
+            "name": "parseProperty",
+            "params": [
+                {
+                    "name": "prop",
+                    "description": "A valid Hypo property definition",
+                    "type": "Object"
+                }
+            ],
+            "return": {
+                "description": "An entity, hypo instance, or value based on the passed property"
+            },
+            "class": "Hypo"
+        },
+        {
+            "file": "lib\\hypo.js",
+            "line": 287,
+            "description": "Parses the definition for the passed name, including recursing through\nany parent definitions.",
+            "itemtype": "method",
+            "name": "parseDefinition",
+            "params": [
+                {
+                    "name": "name",
+                    "description": "Then entity name to parse",
+                    "type": "String"
+                }
+            ],
+            "return": {
+                "description": "The parsed definition",
+                "type": "Object"
+            },
+            "class": "Hypo"
+        }
+    ]
+}

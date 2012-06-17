@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>lib\hypo.js - The Hypo API</title>
+    <link rel="stylesheet" href="http:&#x2F;&#x2F;yui.yahooapis.com&#x2F;3.5.1&#x2F;build&#x2F;cssgrids&#x2F;cssgrids-min.css">
+    <link rel="stylesheet" href="..&#x2F;assets/vendor/prettify/prettify-min.css">
+    <link rel="stylesheet" href="..&#x2F;assets/css/main.css" id="site_styles">
+    <link rel="shortcut icon" type="image/png" href="..&#x2F;assets/favicon.png">
+    <script src="http:&#x2F;&#x2F;yui.yahooapis.com&#x2F;combo?3.5.1&#x2F;build&#x2F;yui&#x2F;yui-min.js"></script>
+</head>
+<body class="yui3-skin-sam">
+
+<div id="doc">
+    <div id="hd" class="yui3-g header">
+        <div class="yui3-u-3-4">
+            
+                <h1><img src="..&#x2F;assets/css/logo.png" title="The Hypo API"></h1>
+            
+        </div>
+        <div class="yui3-u-1-4 version">
+            <em>API Docs for: 0.1.0</em>
+        </div>
+    </div>
+    <div id="bd" class="yui3-g">
+
+        <div class="yui3-u-1-4">
+            <div id="docs-sidebar" class="sidebar apidocs">
+                <div id="api-list">
+    <h2 class="off-left">APIs</h2>
+    <div id="api-tabview" class="tabview">
+        <ul class="tabs">
+            <li><a href="#api-classes">Classes</a></li>
+            <li><a href="#api-modules">Modules</a></li>
+        </ul>
+
+        <div id="api-tabview-filter">
+            <input type="search" id="api-filter" placeholder="Type to filter APIs">
+        </div>
+
+        <div id="api-tabview-panel">
+            <ul id="api-classes" class="apis classes">
+            
+                <li><a href="..&#x2F;classes/Hypo.html">Hypo</a></li>
+            
+            </ul>
+
+            <ul id="api-modules" class="apis modules">
+            
+            </ul>
+        </div>
+    </div>
+</div>
+
+            </div>
+        </div>
+        <div class="yui3-u-3-4">
+                <div id="api-options">
+        Show:
+        <label for="api-show-inherited">
+            <input type="checkbox" id="api-show-inherited" checked>
+            Inherited
+        </label>
+
+        <label for="api-show-protected">
+            <input type="checkbox" id="api-show-protected">
+            Protected
+        </label>
+
+        <label for="api-show-private">
+            <input type="checkbox" id="api-show-private">
+            Private
+        </label>
+        <label for="api-show-deprecated">
+            <input type="checkbox" id="api-show-deprecated">
+            Deprecated
+        </label>
+
+    </div>
+
+
+            <div class="apidocs">
+                <div id="docs-main">
+                    <div class="content">
+                        <h1 class="file-heading">File: lib\hypo.js</h1>
+
+<div class="file">
+    <pre class="code prettyprint linenums">
+!function (define) {
+
+    define(&#x27;Hypo&#x27;, function(){
+        
+        &#x2F;**
+         * Hypo dependency injection framework constructor.
+         *
+         * @class Hypo
+         * @constructor
+         * @param definitions {object} An object that defines the entities
+         * and their dependencies to be managed by this Hypo instance.
+         *
+         * @example
+         *
+         *     var A = function(){};
+         *     var B = function(){};
+         *     var C = function(a, str){
+         *         this.a = a;
+         *         this.str = str;
+         *     };
+         *     var dFactory = {
+         *         &#x27;someValue&#x27; : &#x27;I\&#x27;m manufactured&#x27;,
+         *         &#x27;factoryMethod&#x27; : function(a){
+         *             return {
+         *                 &#x27;a&#x27; : a,
+         *                 &#x27;message&#x27; : this.someValue
+         *             };
+         *         }
+         *     };
+         *     var F = function(){};
+         *     
+         *     var definitions = {
+         *         &#x2F;&#x2F; Transient entity with no dependencies
+         *         &#x27;a&#x27; : {
+         *             &#x27;transient&#x27; : true,
+         *             &#x27;ctor&#x27; : A
+         *         },
+         *         &#x2F;&#x2F; A singleton entity with three injected
+         *         &#x2F;&#x2F; dependencies: the hypo instance, an entity,
+         *         &#x2F;&#x2F; and a plain object
+         *         &#x27;b&#x27; : {
+         *             &#x27;ctor&#x27; : B,
+         *             &#x27;props&#x27; : {
+         *                 &#x27;hypo&#x27; : {&#x27;hypo&#x27; : true},
+         *                 &#x27;a&#x27; : {&#x27;entity&#x27; : &#x27;a&#x27;},
+         *                 &#x27;obj&#x27; : {&#x27;value&#x27; : {
+         *                     &#x27;num&#x27; : 1
+         *                 }}
+         *             }
+         *         },
+         *         &#x2F;&#x2F; A lazy singleton entity with two injected
+         *         &#x2F;&#x2F; constructor arguments: an entity, and a
+         *         &#x2F;&#x2F; simple value.
+         *         &#x27;c&#x27; : {
+         *             &#x27;lazy&#x27; : true,
+         *             &#x27;ctor&#x27; : C,
+         *             &#x27;ctorArgs&#x27; : [
+         *                 {&#x27;entity&#x27; : &#x27;d&#x27;},
+         *                 {&#x27;value&#x27; : &#x27;I\&#x27;m an entity!&#x27;}
+         *             ]
+         *         },
+         *         &#x2F;&#x2F; A singleton constructed by a factory.
+         *         &#x27;d&#x27; : {
+         *             &#x27;factory&#x27; : {
+         *                 &#x27;context&#x27; : dFactory,
+         *                 &#x27;method&#x27; : &#x27;factoryMethod&#x27;,
+         *                 &#x27;args&#x27; : [
+         *                     {&#x27;entity&#x27;: &#x27;a&#x27;}
+         *                 ]
+         *             }
+         *         },
+         *         &#x2F;&#x2F; An abstract entity.  Abstract entities
+         *         &#x2F;&#x2F; cannot be instantiated, and serve as
+         *         &#x2F;&#x2F; parents for concrete entities
+         *         &#x27;e&#x27; : {
+         *             &#x27;abstract&#x27; : true,
+         *             &#x27;props&#x27; : {
+         *                 &#x27;a&#x27; : {&#x27;entity&#x27; : &#x27;a&#x27;}
+         *             }
+         *         },
+         *         &#x2F;&#x2F; An entity with a parent entity.  In this
+         *         &#x2F;&#x2F; case the parent is an abstract entity, but
+         *         &#x2F;&#x2F; this doesn&#x27;t necessarily have to be the case.
+         *         &#x27;f&#x27; : {
+         *             &#x27;ctor&#x27; : F,
+         *             &#x27;parent&#x27; : &#x27;e&#x27;
+         *         }
+         *     };
+         *
+         *     var hypo = new Hypo(definitions);
+         *     
+         *     var a = hypo.getEntity(&#x27;a&#x27;);
+         *     var b = hypo.getEntity(&#x27;b&#x27;);
+         *     var c = hypo.getEntity(&#x27;c&#x27;);
+         *     var d = hypo.getEntity(&#x27;d&#x27;);
+         *     var f = hypo.getEntity(&#x27;f&#x27;);
+         **&#x2F;
+        var Hypo = function(definitions){
+            &#x2F;**
+             * The entity definition object for this Hypo instance.
+             *
+             * @property definitions
+             * @type {object}
+             **&#x2F;
+            this.definitions = definitions;
+            &#x2F;**
+             * A map of all singleton entities managed by this instance.
+             *
+             * @property singletonMap   
+             * @type {object}
+             **&#x2F;
+            this.singletonMap = {};
+            this.generateSingletons();
+        };
+        
+        Hypo.prototype = {
+            &#x2F;**
+             * Generates the non-lazy singleton entities managed by this instance.
+             * This method is called when the hypo instance is constructed, and does
+             * not need to be called again.
+             *
+             * @method generateSingletons
+             * @return {void}
+             **&#x2F;
+            generateSingletons : function(){
+                var def;
+                for(var name in this.definitions)
+                    if(this.definitions.hasOwnProperty(name)){
+                        def = this.definitions[name];
+                        if(!def.transient &amp;&amp; !def.lazy &amp;&amp; !def.abstract)
+                            this.getEntity(name);
+                    }
+            },
+            &#x2F;**
+             * The method for retrieving entities.  If an entity is a singleton
+             * and not particularly lazy, it will have been created along with
+             * the Hypo instance.  Otherwise, it will be created the first time
+             * it is requested in the case of lazy singletons, and each time in
+             * the case of transient entities.
+             *
+             * @method getEntity
+             * @param name {string} Corresponds to the key in definitions
+             * representing the entity definition to retieve an instance of.
+             * @return {object} The entity instance generated from the definition
+             * corresponding with the passed name.
+             **&#x2F;
+            getEntity : function(name){
+                var def = this.parseDefinition(name),
+                parentDef, entity, args, i, ctor, context;
+                if(def.abstract)
+                    throw &#x27;Hypo Error: &quot;&#x27; + name + &#x27;&quot; is an abstract entity, and cannot be retrieved.&#x27;
+                if(!def.transient &amp;&amp; this.singletonMap[name])
+                    entity = this.singletonMap[name];
+                else{
+                    if(def.ctor){
+                        ctor = def.ctor
+                        args = def.ctorArgs;
+                    }
+                    else if(def.factory){
+                        context = def.factory.context;
+                        ctor = context[def.factory.method];
+                        args = def.factory.args;
+                    }
+                    else
+                        throw &#x27;Hypo Error: Non-abstract entity &quot;&#x27; + name + &#x27;&quot; must have a ctor or factory defined.&#x27;;
+                    entity = this.createEntity(ctor, args, name, context);
+                    if(!def.transient)
+                        this.singletonMap[name] = entity;
+                    this.applyProperties(entity, def.props)
+                }
+                
+                return entity;
+            },
+            &#x2F;**
+             * Creates a new object using the passed constructor function and
+             * argument property definitions.  See parseProperty for a description
+             * of appropriate Hypo property definitions.
+             *
+             * @method createEntity
+             * @param ctor {function} The constructor function to be
+             * invoked with the parsed argument definitions.
+             * @param argDefs {array} An array of Hypo property definitions
+             * @param entityName {string} The name of the entity being constructed;
+             * used to check for circular dependencies.
+             * @param context {object} The context in which to call the constructor;
+             * used when applying factory methods.
+             **&#x2F;
+            createEntity : function(ctor, argDefs, entityName, context){
+                var entity = function(){},
+                args = [],
+                entityDef, ret, inst, i, j;
+                
+                if(typeof ctor != &#x27;function&#x27;)
+                    throw &#x27;Hypo Error: Invalid ctor or factory method for &quot;&#x27; + entityName + &#x27;&quot;.&#x27;; 
+                if(argDefs)
+                    for(i=0; i&lt;argDefs.length; i++){
+                        &#x2F;&#x2F; Check for circular dependencies
+                        if(argDefs[i].entity){
+                            entityDef = this.definitions[argDefs[i].entity];
+                            if(entityDef.ctorArgs){
+                                for(var j=0; j&lt;entityDef.ctorArgs.length; j++){
+                                    if(entityDef.ctorArgs[j].entity == entityName)
+                                        throw(
+                                            &#x27;Hypo Error: Circular dependency between &quot;&#x27; +
+                                            entityName + &#x27;&quot; and &quot;&#x27; + argDefs[i].entity + &#x27;&quot;.&#x27;
+                                        );
+                                }
+                            }
+                        }
+                        args.push(this.parseProperty(argDefs[i]));
+                    }
+                
+                if(context)
+                    ret = ctor.apply(context, args);
+                else{
+                    entity.prototype = ctor.prototype;
+                    inst = new entity();
+                    ret = ctor.apply(inst, args) || inst;
+                }
+                
+                return ret;
+            },
+            &#x2F;**
+             * Applies properties to an entity instance based on the passed set of
+             * property definitions.  See parseProperty for a description of
+             * appropriate Hypo property definitions.
+             *
+             * @method applyProperties
+             * @param entity {object} An entity instance to apply the parsed properties to.
+             * @param propertyDefinitions  {object} An object with keys corresponding to
+             * the properties to be applied to the entity, and Hypo property definition
+             * values.
+             **&#x2F;
+            applyProperties : function(entity, propertyDefinitions){
+                if(propertyDefinitions)
+                    for(var prop in propertyDefinitions)
+                        if(propertyDefinitions.hasOwnProperty(prop))
+                            entity[prop] = this.parseProperty(propertyDefinitions[prop]);
+            },
+            &#x2F;**
+             * Parses Hypo property definitions.  These definitions are used for
+             * constructor arguments, factory arguments, and property definitions.
+             * Valid property objects are as follows:
+             * 
+             * @example
+             * Passing an object with a hypo key returns a reference to the Hypo instance
+             * 
+             *     {
+             *         hypo : true    
+             *     }
+             *       
+             * Passing an object with an entity key equal to an entity name returns an entity
+             * instance.
+             * 
+             *     {
+             *         entity : &quot;entity name&quot;
+             *     }
+             *       
+             * Passing an object with a key &quot;value&quot; returns that value.
+             * 
+             *     {
+             *         value : &quot;object or primitive value&quot;
+             *     }
+             *       
+             * Any other object configuration will result in an error being thrown.
+             *
+             * @method parseProperty
+             * @param prop {object} A valid Hypo property definition
+             * @returns An entity, hypo instance, or value based on the passed property 
+             **&#x2F;
+            parseProperty : function(propDef){
+                var errorMsg = &#x27;Hypo Error: Invalid property or ctor argument definition.&#x27;,
+                ret;
+                if(!propDef)
+                    throw errorMsg
+                if(propDef.hasOwnProperty(&#x27;hypo&#x27;))
+                    ret = this;
+                else if(propDef.hasOwnProperty(&#x27;entity&#x27;))
+                    ret = this.getEntity(propDef.entity);
+                else if(propDef.hasOwnProperty(&#x27;value&#x27;))
+                    ret = propDef.value;
+                else
+                    throw errorMsg
+                    
+                return ret;
+            },
+            &#x2F;**
+             * Parses the definition for the passed name, including recursing through
+             * any parent definitions.
+             *
+             * @method parseDefinition
+             * @param name {string} Then entity name to parse
+             * @return {object} The parsed definition
+             **&#x2F;
+            parseDefinition : function(name){
+                var def = this.definitions[name],
+                key;
+                
+                if(!def)
+                    throw &#x27;Hypo Error: Invalid entity name + &quot;&#x27; + name + &#x27;&quot;.&#x27;;
+                if(def.parent &amp;&amp; !def.parsed){
+                    parent = this.parseDefinition(def.parent);
+                    for(key in parent)
+                        if(
+                            key != &#x27;abstract&#x27; &amp;&amp;
+                            parent.hasOwnProperty(key) &amp;&amp;
+                            !def.hasOwnProperty(key)
+                        )
+                            def[key] = parent[key];
+                }
+                def.parsed = true;
+                return def;
+            }
+        };
+        
+        return Hypo;
+    });
+}(
+    typeof define === &#x27;function&#x27; &amp;&amp; define.amd ? define :
+    typeof module !== &#x27;undefined&#x27; &amp;&amp; module.exports ? function(id, factory){module.exports = factory()} :
+    function (id, factory) {window[id] = factory()}
+);
+    </pre>
+</div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="..&#x2F;assets/vendor/prettify/prettify-min.js"></script>
+<script>prettyPrint();</script>
+<script src="..&#x2F;assets/js/yui-prettify.js"></script>
+<script src="..&#x2F;assets/../api.js"></script>
+<script src="..&#x2F;assets/js/api-filter.js"></script>
+<script src="..&#x2F;assets/js/api-list.js"></script>
+<script src="..&#x2F;assets/js/api-search.js"></script>
+<script src="..&#x2F;assets/js/apidocs.js"></script>
+</body>
+</html>
