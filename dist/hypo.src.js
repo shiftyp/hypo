@@ -55,6 +55,20 @@
         
         Hypo.prototype = {
             /**
+             * Custom error constructor for framework specific errors
+             *
+             * @property HypoError
+             * @type {function}
+             **/
+            HypoError : function(){
+                var err = function(message){
+                    this.name = 'HypoError';
+                    this.message = message;
+                }
+                err.prototype = new Error();
+                return err;
+            }(),
+            /**
              * Generates the non-lazy singleton entities managed by this instance.
              * This method is called when the hypo instance is constructed, and does
              * not need to be called again.
@@ -88,13 +102,13 @@
                 var def = this.parseDefinition(name),
                 parentDef, entity, args, i, ctor, context;
                 if(def.abstract)
-                    throw new Error('Hypo Error: "' + name + '" is an abstract entity, and cannot be retrieved.');
+                    throw new this.HypoError('"' + name + '" is an abstract entity, and cannot be retrieved.');
                 if(!def.transient && this.singletonMap[name])
                     entity = this.singletonMap[name];
                 else{
                     if(def.ctor){
                         ctor = def.ctor
-                        args = def.ctorArgs;
+                        args = def.args;
                     }
                     else if(def.factory){
                         context =
@@ -105,7 +119,7 @@
                         args = def.factory.args;
                     }
                     else
-                        throw new Error('Hypo Error: Non-abstract entity "' + name + '" must have a ctor or factory defined.');
+                        throw new this.HypoError('Non-abstract entity "' + name + '" must have a ctor or factory defined.');
                     entity = this.createEntity(ctor, args, name, context);
                     if(!def.transient)
                         this.singletonMap[name] = entity;
@@ -134,21 +148,21 @@
                 entityDef, ret, inst, i, j;
                 
                 if(typeof ctor != 'function')
-                    throw new Error('Hypo Error: Invalid ctor or factory method for "' + entityName + '".'); 
+                    throw new Error('Invalid ctor or factory method for "' + entityName + '".'); 
                 if(argDefs)
                     for(i=0; i<argDefs.length; i++){
                         // Check for circular dependencies
                         if(argDefs[i].entity){
-                            var depError = new Error(
-                                'Hypo Error: Circular dependency between "' +
+                            var depError = new this.HypoError(
+                                'Circular dependency between "' +
                                 entityName + '" and "' + argDefs[i].entity + '".'
                             );
                             if(argDefs[i].entity == entityName)
                                 throw depError;
                             entityDef = this.definitions[argDefs[i].entity];
-                            if(entityDef.ctorArgs){
-                                for(var j=0; j<entityDef.ctorArgs.length; j++){
-                                    if(entityDef.ctorArgs[j].entity == entityName)
+                            if(entityDef.args){
+                                for(var j=0; j<entityDef.args.length; j++){
+                                    if(entityDef.args[j].entity == entityName)
                                         throw depError;
                                 }
                             }
@@ -219,7 +233,7 @@
              * @returns An entity, hypo instance, or value based on the passed property 
              **/
             parseProperty : function(propDef){
-                var propError = new Error('Hypo Error: Invalid property or ctor argument definition.'),
+                var propError = new this.HypoError('Invalid property or ctor argument definition.'),
                 ret;
                 if(!propDef)
                     throw propError
@@ -248,7 +262,7 @@
                 key, propKey, defProps, parentProps;
                 
                 if(!def)
-                    throw new Error('Hypo Error: Invalid entity name + "' + name + '".');
+                    throw new this.HypoError('Hypo Error: Invalid entity name + "' + name + '".');
                 if(def.parent && !def.parsed){
                     parent = this.parseDefinition(def.parent);
                     for(key in parent)

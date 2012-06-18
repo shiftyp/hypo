@@ -60,6 +60,15 @@
         {
             "file": "lib\\hypo.js",
             "line": 33,
+            "description": "Custom error constructor for framework specific errors",
+            "itemtype": "property",
+            "name": "HypoError",
+            "type": "{function}",
+            "class": "Hypo"
+        },
+        {
+            "file": "lib\\hypo.js",
+            "line": 47,
             "description": "Generates the non-lazy singleton entities managed by this instance.\nThis method is called when the hypo instance is constructed, and does\nnot need to be called again.",
             "itemtype": "method",
             "name": "generateSingletons",
@@ -71,7 +80,7 @@
         },
         {
             "file": "lib\\hypo.js",
-            "line": 50,
+            "line": 64,
             "description": "The method for retrieving entities.  If an entity is a singleton\nand not particularly lazy, it will have been created along with\nthe Hypo instance.  Otherwise, it will be created the first time\nit is requested in the case of lazy singletons, and each time in\nthe case of transient entities.",
             "itemtype": "method",
             "name": "getEntity",
@@ -90,7 +99,7 @@
         },
         {
             "file": "lib\\hypo.js",
-            "line": 93,
+            "line": 107,
             "description": "Creates a new object using the passed constructor function and\nargument property definitions.  See parseProperty for a description\nof appropriate Hypo property definitions.",
             "itemtype": "method",
             "name": "createEntity",
@@ -120,7 +129,7 @@
         },
         {
             "file": "lib\\hypo.js",
-            "line": 149,
+            "line": 163,
             "description": "Applies properties to an entity instance based on the passed set of\nproperty definitions.  See parseProperty for a description of\nappropriate Hypo property definitions.",
             "itemtype": "method",
             "name": "applyProperties",
@@ -140,7 +149,7 @@
         },
         {
             "file": "lib\\hypo.js",
-            "line": 166,
+            "line": 180,
             "description": "Parses Hypo property definitions.  These definitions are used for\nconstructor arguments, factory arguments, and property definitions.\nValid property objects are as follows:",
             "example": [
                 "\nPassing an object with a hypo key returns a reference to the Hypo instance\n\n    {\n        hypo : true    \n    }\n      \nPassing an object with an entity key equal to an entity name returns an entity\ninstance.\n\n    {\n        entity : \"entity name\"\n    }\n      \nPassing an object with a key \"value\" returns that value.\n\n    {\n        value : \"object or primitive value\"\n    }\n      \nAny other object configuration will result in an error being thrown."
@@ -161,7 +170,7 @@
         },
         {
             "file": "lib\\hypo.js",
-            "line": 213,
+            "line": 227,
             "description": "Parses the definition for the passed name, including recursing through\nany parent definitions, and merging parent and child properties where\nneeded.",
             "itemtype": "method",
             "name": "parseDefinition",

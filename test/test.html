@@ -119,7 +119,7 @@ YUI().use("test", "console", function (Y) {
         
         _should : {
             error : {
-                testAbstractCreation : Error
+                testAbstractCreation : Hypo.HypoError
             }
         },
         
@@ -264,11 +264,17 @@ YUI().use("test", "console", function (Y) {
             delete this.ctor;
         },
         
+        _should : {
+            error : {
+                testConstructorCircularArgument : Hypo.HypoError
+            }
+        },
+        
         testConstructorEntityArgument : function(){
             var definitions = {
                 'a' : {
                     'ctor' : this.ctor,
-                    'ctorArgs' : [
+                    'args' : [
                         {'entity' : 'b'}
                     ]
                 },
@@ -287,7 +293,7 @@ YUI().use("test", "console", function (Y) {
             var definitions = {
                 'a' : {
                     'ctor' : this.ctor,
-                    'ctorArgs' : [
+                    'args' : [
                         {'value': num}
                     ]
                 }
@@ -301,7 +307,7 @@ YUI().use("test", "console", function (Y) {
             var definitions = {
                 'a' : {
                     'ctor' : this.ctor,
-                    'ctorArgs' : [
+                    'args' : [
                         {'hypo':true}
                     ]
                 }
@@ -316,7 +322,7 @@ YUI().use("test", "console", function (Y) {
             var definitions = {
                 'a' : {
                     'ctor' : this.ctor,
-                    'ctorArgs' : [
+                    'args' : [
                         {'value' : obj}
                     ]
                 }
@@ -324,14 +330,212 @@ YUI().use("test", "console", function (Y) {
             var hypo = new Hypo(definitions);
             var a = hypo.getEntity('a');
             Y.assert(a.arg == obj, "Object constructor arguments should equla the passed object");
+        },
+        
+        testConstructorCircularArgument : function(){
+            var definitions = {
+                'a' : {
+                    'ctor' : this.ctor,
+                    'args' : [
+                        {'entity' : 'c'}
+                    ]
+                },
+                'b' : {
+                    'ctor' : this.ctor,
+                    'args' : [
+                        {'entity': 'a'}
+                    ]
+                },
+                'c' : {
+                    'ctor' : this.ctor,
+                    'args' : [
+                        {'entity' : 'b'}
+                    ]
+                }
+            };
+            var hypo = new Hypo(definitions);
+        }
+    });
+    
+    var FactoryTestCase = new Y.Test.Case({
+        name : 'Factory Test Case',
+        
+        setUp : function(){
+            this.factoryCtor = function(){
+                this.method = function(arg){
+                    return {
+                        arg : arg
+                    }
+                }
+            };
+            this.factory = new this.factoryCtor();
+        },
+        
+        tearDown : function(){
+            delete this.factoryCtor;
+            delete this.factory;
+        },
+        
+        _should : {
+            error : {
+                testFactoryCircularArgument : Hypo.HypoError
+            }
+        },
+        
+        testConcreteFactory : function(){
+            var method = 'method';
+            var definitions = {
+                'a' : {
+                    'factory' : {
+                        'context' : this.factory,
+                        'method' : method
+                    }
+                }
+            }
+            var hypo = new Hypo(definitions);
+            var a = hypo.getEntity('a');
+        },
+        
+        testEntityFactory : function(){
+            var method = 'method';
+            var definitions = {
+                'a' : {
+                    'factory' : {
+                        'context' : 'factory',
+                        'method' : method
+                    }
+                },
+                'factory' : {
+                    'ctor' : this.factoryCtor
+                }
+            }
+            var hypo = new Hypo(definitions);
+            var a = hypo.getEntity('a');
+        },
+        
+        testFactoryEntityArgument : function(){
+            var method = 'method';
+            var definitions = {
+                'a' : {
+                    'factory' : {
+                        'context' : this.factory,
+                        'method' : method,
+                        'args' : [
+                            {'entity': 'b'}
+                        ]
+                    }
+                },
+                'b' : {
+                    'ctor' : this.factoryCtor  
+                }
+            }
+            var hypo = new Hypo(definitions);
+            var a = hypo.getEntity('a');
+            var b = hypo.getEntity('b');
+            Y.assert(a.arg == b, "Entity factory arguments should equal the referenced entity");
+        },
+        
+        testFactorySimpleArgument : function(){
+            var method = 'method';
+            var num = 1;
+            var definitions = {
+                'a' : {
+                    'factory' : {
+                        'context' : this.factory,
+                        'method' : method,
+                        'args' : [
+                            {'value': num}
+                        ]
+                    }
+                }
+            }
+            var hypo = new Hypo(definitions);
+            var a = hypo.getEntity('a');
+            Y.assert(a.arg == num, "Simple factory arguments should equal the passed value");
+        },
+        
+        testFactoryHypoArgument : function(){
+            var method = 'method';
+            var definitions = {
+                'a' : {
+                    'factory' : {
+                        'context' : this.factory,
+                        'method' : method,
+                        'args' : [
+                            {'hypo': 'true'}
+                        ]
+                    }
+                }
+            }
+            var hypo = new Hypo(definitions);
+            var a = hypo.getEntity('a');
+            Y.assert(a.arg == hypo, "Hypo factory arguments should equal the hypo instance");
+        },
+        
+        testFactoryObjectArgument : function(){
+            var method = 'method';
+            var obj = {}
+            var definitions = {
+                'a' : {
+                    'factory' : {
+                        'context' : this.factory,
+                        'method' : method,
+                        'args' : [
+                            {'value': obj}
+                        ]
+                    }
+                }
+            }
+            var hypo = new Hypo(definitions);
+            var a = hypo.getEntity('a');
+            Y.assert(a.arg == obj, "Object factory arguments should equal the passed object");
+        },
+        
+        testFactoryCircularArgument : function(){
+            var method = 'method';
+            var definitions = {
+                'a' : {
+                    'factory' : {
+                        'context' : 'factory',
+                        'method' : method,
+                        'args' : [
+                            {'entity': 'b'}
+                        ]
+                    }
+                },
+                'factory' : {
+                    'ctor' : this.factoryCtor,
+                    'args' : [
+                        {'entity' : 'a'}
+                    ]
+                }
+            }
+            var hypo = new Hypo(definitions);
         }
     });
 
+    var ParentTestSuite = new Y.Test.Case({
+        name : 'Parent Test Case',
+        
+        setUp : function(){
+            this.ctor = function(arg){
+                this.arg = arg;
+            }
+        },
+        
+        tearDown : function(){
+            delete this.ctor;
+        },
+        
+        
+    });
+    
     var HypoSuite = new Y.Test.Suite("Hypo Test Suite");
 
     HypoSuite.add(getEntityTestCase);
     HypoSuite.add(PropertyTestCase);
     HypoSuite.add(ConstructorArgumentTestCase);
+    HypoSuite.add(FactoryTestCase);
     
     Y.Test.Runner.subscribe(Y.Test.Runner.BEGIN_EVENT, logEvent);
     Y.Test.Runner.subscribe(Y.Test.Runner.COMPLETE_EVENT, logEvent);

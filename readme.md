@@ -60,7 +60,7 @@ var definitions = {
     'c' : {
         'lazy' : true,
         'ctor' : C,
-        'ctorArgs' : [
+        'args' : [
             {'entity' : 'd'},
             {'value' : 'I\'m an entity!'}
         ]
@@ -69,7 +69,7 @@ var definitions = {
     // a factory
     'factory' : {
         'ctor' : Factory,
-        'ctorArgs' : [
+        'args' : [
             {'value' : 'I\'m manufactured!'}
         ]
     },
