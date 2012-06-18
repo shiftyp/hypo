@@ -32,102 +32,8 @@
          * @class Hypo
          * @constructor
          * @param definitions {object} An object that defines the entities
-         * and their dependencies to be managed by this Hypo instance.
-         *
-         * @example
-         *
-         *     var A = function(){};
-         *     var B = function(){};
-         *     var C = function(a, str){
-         *         this.a = a;
-         *         this.str = str;
-         *     };
-         *     var Factory = function(message){
-         *         this.factoryMethod = function(a){
-         *              return {
-         *                  'a' : a,
-         *                  'message' : message
-         *              };
-         *          }
-         *     };
-         *     var F = function(){};
-         *     
-         *     var definitions = {
-         *         // Transient entity with no dependencies
-         *         'a' : {
-         *             'transient' : true,
-         *             'ctor' : A
-         *         },
-         *         // A singleton entity with three injected
-         *         // dependencies: the hypo instance, an entity,
-         *         // and a plain object
-         *         'b' : {
-         *             'ctor' : B,
-         *             'props' : {
-         *                 'hypo' : {'hypo' : true},
-         *                 'a' : {'entity' : 'a'},
-         *                 'obj' : {'value' : {
-         *                     'num' : 1
-         *                 }}
-         *             }
-         *         },
-         *         // A lazy singleton entity with two injected
-         *         // constructor arguments: an entity, and a
-         *         // simple value.
-         *         'c' : {
-         *             'lazy' : true,
-         *             'ctor' : C,
-         *             'ctorArgs' : [
-         *                 {'entity' : 'd'},
-         *                 {'value' : 'I\'m an entity!'}
-         *             ]
-         *         },
-         *         // Another singleton, to be used later as
-         *         // a factory
-         *         'factory' : {
-         *             'ctor' : Factory,
-         *             'ctorArgs' : [
-         *                 {'value' : 'I\'m manufactured!'}
-         *             ]
-         *         },
-         *         // A singleton constructed by a factory.
-         *         // the factory context is a string which
-         *         // references an entity, but it could also
-         *         // be a reference to an object
-         *         'd' : {
-         *             'factory' : {
-         *                 'context' : 'factory',
-         *                 'method' : 'factoryMethod',
-         *                 'args' : [
-         *                     {'entity': 'a'}
-         *                 ]
-         *             }
-         *         },
-         *         // An abstract entity.  Abstract entities
-         *         // cannot be instantiated, and serve as
-         *         // parents for concrete entities
-         *         'e' : {
-         *             'abstract' : true,
-         *             'props' : {
-         *                 'a' : {'entity' : 'a'}
-         *             }
-         *         },
-         *         // An entity with a parent entity.  In this
-         *         // case the parent is an abstract entity, but
-         *         // this doesn't necessarily have to be the case.
-         *         'f' : {
-         *             'ctor' : F,
-         *             'parent' : 'e'
-         *         }
-         *     };
-         *
-         *     var hypo = new Hypo(definitions);
-         *     
-         *     var a = hypo.getEntity('a');
-         *     var b = hypo.getEntity('b');
-         *     var c = hypo.getEntity('c');
-         *     var d = hypo.getEntity('d');
-         *     var f = hypo.getEntity('f');
+         * and their dependencies to be managed by this Hypo instance. See
+         * readme for a full example of a hypo configuration object.
          **/
         var Hypo = function(definitions){
             /**
@@ -330,7 +236,8 @@
             },
             /**
              * Parses the definition for the passed name, including recursing through
-             * any parent definitions.
+             * any parent definitions, and merging parent and child properties where
+             * needed.
              *
              * @method parseDefinition
              * @param name {string} Then entity name to parse
@@ -338,7 +245,7 @@
              **/
             parseDefinition : function(name){
                 var def = this.definitions[name],
-                key;
+                key, propKey, defProps, parentProps;
                 
                 if(!def)
                     throw new Error('Hypo Error: Invalid entity name + "' + name + '".');
@@ -347,10 +254,25 @@
                     for(key in parent)
                         if(
                             key != 'abstract' &&
+                            key != 'parsed' &&
                             parent.hasOwnProperty(key) &&
-                            !def.hasOwnProperty(key)
-                        )
-                            def[key] = parent[key];
+                            (key == 'props' || !def.hasOwnProperty(key))
+                        ){
+                            if(key == 'props' && def.hasOwnProperty('props')){
+                                defProps = def.props;
+                                parentProps = parent.props;
+                                
+                                for(propKey in parentProps){
+                                    if(
+                                        parentProps.hasOwnProperty(propKey) &&
+                                        !defProps.hasOwnProperty(propKey)
+                                    )
+                                        defProps[propKey] = parentProps[propKey];
+                                }
+                            }
+                            else
+                                def[key] = parent[key];
+                        }
                 }
                 def.parsed = true;
                 return def;

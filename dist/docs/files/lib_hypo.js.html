@@ -96,102 +96,8 @@
          * @class Hypo
          * @constructor
          * @param definitions {object} An object that defines the entities
-         * and their dependencies to be managed by this Hypo instance.
-         *
-         * @example
-         *
-         *     var A = function(){};
-         *     var B = function(){};
-         *     var C = function(a, str){
-         *         this.a = a;
-         *         this.str = str;
-         *     };
-         *     var Factory = function(message){
-         *         this.factoryMethod = function(a){
-         *              return {
-         *                  &#x27;a&#x27; : a,
-         *                  &#x27;message&#x27; : message
-         *              };
-         *          }
-         *     };
-         *     var F = function(){};
-         *     
-         *     var definitions = {
-         *         &#x2F;&#x2F; Transient entity with no dependencies
-         *         &#x27;a&#x27; : {
-         *             &#x27;transient&#x27; : true,
-         *             &#x27;ctor&#x27; : A
-         *         },
-         *         &#x2F;&#x2F; A singleton entity with three injected
-         *         &#x2F;&#x2F; dependencies: the hypo instance, an entity,
-         *         &#x2F;&#x2F; and a plain object
-         *         &#x27;b&#x27; : {
-         *             &#x27;ctor&#x27; : B,
-         *             &#x27;props&#x27; : {
-         *                 &#x27;hypo&#x27; : {&#x27;hypo&#x27; : true},
-         *                 &#x27;a&#x27; : {&#x27;entity&#x27; : &#x27;a&#x27;},
-         *                 &#x27;obj&#x27; : {&#x27;value&#x27; : {
-         *                     &#x27;num&#x27; : 1
-         *                 }}
-         *             }
-         *         },
-         *         &#x2F;&#x2F; A lazy singleton entity with two injected
-         *         &#x2F;&#x2F; constructor arguments: an entity, and a
-         *         &#x2F;&#x2F; simple value.
-         *         &#x27;c&#x27; : {
-         *             &#x27;lazy&#x27; : true,
-         *             &#x27;ctor&#x27; : C,
-         *             &#x27;ctorArgs&#x27; : [
-         *                 {&#x27;entity&#x27; : &#x27;d&#x27;},
-         *                 {&#x27;value&#x27; : &#x27;I\&#x27;m an entity!&#x27;}
-         *             ]
-         *         },
-         *         &#x2F;&#x2F; Another singleton, to be used later as
-         *         &#x2F;&#x2F; a factory
-         *         &#x27;factory&#x27; : {
-         *             &#x27;ctor&#x27; : Factory,
-         *             &#x27;ctorArgs&#x27; : [
-         *                 {&#x27;value&#x27; : &#x27;I\&#x27;m manufactured!&#x27;}
-         *             ]
-         *         },
-         *         &#x2F;&#x2F; A singleton constructed by a factory.
-         *         &#x2F;&#x2F; the factory context is a string which
-         *         &#x2F;&#x2F; references an entity, but it could also
-         *         &#x2F;&#x2F; be a reference to an object
-         *         &#x27;d&#x27; : {
-         *             &#x27;factory&#x27; : {
-         *                 &#x27;context&#x27; : &#x27;factory&#x27;,
-         *                 &#x27;method&#x27; : &#x27;factoryMethod&#x27;,
-         *                 &#x27;args&#x27; : [
-         *                     {&#x27;entity&#x27;: &#x27;a&#x27;}
-         *                 ]
-         *             }
-         *         },
-         *         &#x2F;&#x2F; An abstract entity.  Abstract entities
-         *         &#x2F;&#x2F; cannot be instantiated, and serve as
-         *         &#x2F;&#x2F; parents for concrete entities
-         *         &#x27;e&#x27; : {
-         *             &#x27;abstract&#x27; : true,
-         *             &#x27;props&#x27; : {
-         *                 &#x27;a&#x27; : {&#x27;entity&#x27; : &#x27;a&#x27;}
-         *             }
-         *         },
-         *         &#x2F;&#x2F; An entity with a parent entity.  In this
-         *         &#x2F;&#x2F; case the parent is an abstract entity, but
-         *         &#x2F;&#x2F; this doesn&#x27;t necessarily have to be the case.
-         *         &#x27;f&#x27; : {
-         *             &#x27;ctor&#x27; : F,
-         *             &#x27;parent&#x27; : &#x27;e&#x27;
-         *         }
-         *     };
-         *
-         *     var hypo = new Hypo(definitions);
-         *     
-         *     var a = hypo.getEntity(&#x27;a&#x27;);
-         *     var b = hypo.getEntity(&#x27;b&#x27;);
-         *     var c = hypo.getEntity(&#x27;c&#x27;);
-         *     var d = hypo.getEntity(&#x27;d&#x27;);
-         *     var f = hypo.getEntity(&#x27;f&#x27;);
+         * and their dependencies to be managed by this Hypo instance. See
+         * readme for a full example of a hypo configuration object.
          **&#x2F;
         var Hypo = function(definitions){
             &#x2F;**
@@ -394,7 +300,8 @@
             },
             &#x2F;**
              * Parses the definition for the passed name, including recursing through
-             * any parent definitions.
+             * any parent definitions, and merging parent and child properties where
+             * needed.
              *
              * @method parseDefinition
              * @param name {string} Then entity name to parse
@@ -402,7 +309,7 @@
              **&#x2F;
             parseDefinition : function(name){
                 var def = this.definitions[name],
-                key;
+                key, propKey, defProps, parentProps;
                 
                 if(!def)
                     throw new Error(&#x27;Hypo Error: Invalid entity name + &quot;&#x27; + name + &#x27;&quot;.&#x27;);
@@ -411,10 +318,25 @@
                     for(key in parent)
                         if(
                             key != &#x27;abstract&#x27; &amp;&amp;
+                            key != &#x27;parsed&#x27; &amp;&amp;
                             parent.hasOwnProperty(key) &amp;&amp;
-                            !def.hasOwnProperty(key)
-                        )
-                            def[key] = parent[key];
+                            (key == &#x27;props&#x27; || !def.hasOwnProperty(key))
+                        ){
+                            if(key == &#x27;props&#x27; &amp;&amp; def.hasOwnProperty(&#x27;props&#x27;)){
+                                defProps = def.props;
+                                parentProps = parent.props;
+                                
+                                for(propKey in parentProps){
+                                    if(
+                                        parentProps.hasOwnProperty(propKey) &amp;&amp;
+                                        !defProps.hasOwnProperty(propKey)
+                                    )
+                                        defProps[propKey] = parentProps[propKey];
+                                }
+                            }
+                            else
+                                def[key] = parent[key];
+                        }
                 }
                 def.parsed = true;
                 return def;
