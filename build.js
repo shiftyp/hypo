@@ -14,6 +14,13 @@ program.command('docs')
 	.action(function(){
 		docs();
 	});
+	
+program.command('all')
+	.description('Compiles code and documentation')
+	.action(function(){
+		compile();
+		docs();
+	});
 
 function compile(){
 	console.log('Compiling and minifying...')
@@ -38,7 +45,6 @@ function docs(){
 	var json = (new Y.YUIDoc(options)).run();
 	var builder = new Y.DocBuilder(options, json);
 	builder.compile();
-	console.log('Documentation built!');
 }
 
 program.parse(process.argv);
