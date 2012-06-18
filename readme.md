@@ -120,6 +120,12 @@ var c = hypo.getEntity('c');
 var d = hypo.getEntity('d');
 var f = hypo.getEntity('f');
 ```
+
+## TODO
+
+* Add better circular dependency checking for constructor and factory arguments.
+Currently the framework only does a shallow check, it should do a full recursive check.
+
 ## Development
 
 To build hypo you need to install [nodejs](http://nodejs.org/).  Then
