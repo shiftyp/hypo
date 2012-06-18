@@ -31,7 +31,8 @@ entities, and factories.
     // similar to the xml configuration file in spring.
     
     var definitions = {
-        // Transient entity with no dependencies
+        // Transient entity with no dependencies.  Transient
+        // entities are created each time you request them.
         'a' : {
             'transient' : true,
             'ctor' : A
@@ -51,7 +52,10 @@ entities, and factories.
         },
         // A lazy singleton entity with two injected
         // constructor arguments: an entity, and a
-        // simple value.
+        // simple value.  Lazy entities are created
+        // the first time you request them, or they
+        // are requested as a dependency of another
+        // entity.
         'c' : {
             'lazy' : true,
             'ctor' : C,
