@@ -521,7 +521,7 @@ YUI().use("test", "console", function (Y) {
             delete this.ctor;
         },
         
-        
+        // TODO
     });
     
     var HypoSuite = new Y.Test.Suite("Hypo Test Suite");
@@ -530,6 +530,7 @@ YUI().use("test", "console", function (Y) {
     HypoSuite.add(PropertyTestCase);
     HypoSuite.add(ConstructorArgumentTestCase);
     HypoSuite.add(FactoryTestCase);
+    HypoSuite.add(ParentTestCase);
     
     Y.Test.Runner.subscribe(Y.Test.Runner.BEGIN_EVENT, logEvent);
     Y.Test.Runner.subscribe(Y.Test.Runner.COMPLETE_EVENT, logEvent);
