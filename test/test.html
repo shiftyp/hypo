@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>Hypo Tests</title>
+    <script type="text/javascript" src="http://yui.yahooapis.com/3.2.0/build/yui/yui-min.js"></script>
+    <script type="text/javascript" src="../dist/hypo.src.js"></script>
+    <style type="text/css">
+    .yui3-skin-sam .yui3-console-entry-pass .yui3-console-entry-cat {
+        background-color: green;
+        color: #fff;
+    }
+    
+    .yui3-skin-sam .yui3-console-entry-fail .yui3-console-entry-cat {
+        background-color: red;
+        color: #fff;
+    }
+    
+    .yui3-skin-sam .yui3-console-entry-ignore .yui3-console-entry-cat {
+        background-color: #666;
+    }
+    
+    </style>
+</head>
+<body class="yui3-skin-sam  yui-skin-sam">
+<div id="console"></div>
+<script>
+YUI().use("test", "console", function (Y) {
+    
+    //create the console
+    var r = new Y.Console({
+        newestOnTop : false,
+        style: 'block' // to anchor in the example content
+    });
+    
+    r.render('#console');
+    
+    function logEvent(event){
+        
+        //data variables
+        var message = "",
+            messageType = "";
+        
+        switch(event.type){
+            case Y.Test.Runner.BEGIN_EVENT:
+                message = "Testing began at " + (new Date()).toString() + ".";
+                messageType = "info";
+                break;
+                
+            case Y.Test.Runner.COMPLETE_EVENT:
+                message = Y.substitute("Testing completed at " +
+                    (new Date()).toString() + ".\n" +
+                    "Passed:{passed} Failed:{failed} " +
+                    "Total:{total} ({ignored} ignored)",
+                    event.results);
+                messageType = "info";
+                break;
+                
+            case Y.Test.Runner.TEST_FAIL_EVENT:
+                message = event.testName + ": failed.\n" + event.error.getMessage();
+                messageType = "fail";
+                break;
+                
+            case Y.Test.Runner.TEST_IGNORE_EVENT:
+                message = event.testName + ": ignored.";
+                messageType = "ignore";
+                break;
+                
+            case Y.Test.Runner.TEST_PASS_EVENT:
+                message = event.testName + ": passed.";
+                messageType = "pass";
+                break;
+                
+            case Y.Test.Runner.TEST_SUITE_BEGIN_EVENT:
+                message = "Test suite \"" + event.testSuite.name + "\" started.";
+                messageType = "info";
+                break;
+                
+            case Y.Test.Runner.TEST_SUITE_COMPLETE_EVENT:
+                message = Y.substitute("Test suite \"" +
+                    event.testSuite.name + "\" completed" + ".\n" +
+                    "Passed:{passed} Failed:{failed} " +
+                    "Total:{total} ({ignored} ignored)",
+                    event.results);
+                messageType = "info";
+                break;
+                
+            case Y.Test.Runner.TEST_CASE_BEGIN_EVENT:
+                message = "Test case \"" + event.testCase.name + "\" started.";
+                messageType = "info";
+                break;
+                
+            case Y.Test.Runner.TEST_CASE_COMPLETE_EVENT:
+                message = Y.substitute("Test case \"" +
+                    event.testCase.name + "\" completed.\n" +
+                    "Passed:{passed} Failed:{failed} " +
+                    "Total:{total} ({ignored} ignored)",
+                    event.results);
+                messageType = "info";
+                break;
+            default:
+                message = "Unexpected event " + event.type;
+                message = "info";
+        }
+    
+        Y.log(message, messageType, "Hypo Tests");
+    };
+
+    var getEntityTestCase = new Y.Test.Case({
+        name: "Singleton Test Case",
+        
+        setUp : function(){
+            this.ctor = function(){}
+        },
+        
+        tearDown : function(){
+            delete this.ctor;
+        },
+        
+        _should : {
+            error : {
+                testAbstractCreation : Error
+            }
+        },
+        
+        testSingletonCreation : function () {
+            var definitions = {
+                'a' : {
+                    'ctor' : this.ctor
+                }
+            };
+            var hypo = new Hypo(definitions);
+            var a1 = hypo.getEntity('a');
+            var a2 = hypo.getEntity('a');
+            Y.assert(a1 instanceof this.ctor, "Entity should be instance of ctor");
+            Y.assert(a2 instanceof this.ctor, "Entity should be instance of ctor");
+            Y.assert(a1 == a2, "Singleton entities should only be created once");
+            Y.assert(hypo.singletonMap.hasOwnProperty('a'), "The entity name should exist in the entity map");
+            Y.assert(hypo.singletonMap.a = a1, "The entity in the singletonMap should equal the entity returned from getEntity");
+        },
+        
+        testLazyCreation : function(){
+            var definitions = {
+                'a' : {
+                    'lazy' : true,
+                    'ctor' : this.ctor
+                }
+            };
+            var hypo = new Hypo(definitions);
+            Y.assert(!hypo.singletonMap.hasOwnProperty('a'), "Lazy entities should not exist after hypo instantiation");
+            var a = hypo.getEntity('a');
+            Y.assert(hypo.singletonMap.hasOwnProperty('a'), "Lazy entities should be added to the singleton map after creation");
+        },
+        
+        testTransientCreation : function(){
+            var definitions = {
+                'a' : {
+                    'transient' : true,
+                    'ctor' : this.ctor
+                }
+            };
+            var hypo = new Hypo(definitions);
+            var a1 = hypo.getEntity('a');
+            var a2 = hypo.getEntity('a');
+            Y.assert(a1 != a2, "Transient entities retrieved seperately should not be equal");
+            Y.assert(!hypo.singletonMap.hasOwnProperty('a'), "Transient entities should not be added to the singletonMap");
+        },
+        
+        testAbstractCreation : function(){
+            var definitions = {
+                'a' : {
+                    'abstract' : true
+                }
+            };
+            var hypo = new Hypo(definitions);
+            hypo.getEntity('a');
+        }
+    });
+    
+    var PropertyTestCase = new Y.Test.Case({
+        name : 'Property Test Case',
+        
+        setUp : function(){
+            this.ctor = function(){}
+        },
+        
+        tearDown : function(){
+            delete this.ctor;
+        },
+        
+        testEntityPropertyAssignment : function(){
+            var definitions = {
+                'a' : {
+                    'ctor' : this.ctor,
+                    'props' : {
+                        'prop' : {'entity' : 'b'}
+                    }
+                },
+                'b' : {
+                    'ctor' : this.ctor
+                }
+            };
+            var hypo = new Hypo(definitions);
+            var a = hypo.getEntity('a');
+            var b = hypo.getEntity('b');
+            Y.assert(a.prop == b, "Entity properties should equal the referenced entity");
+        },
+        
+        testSimplePropertyAssignment : function(){
+            var num = 1;
+            var definitions = {
+                'a' : {
+                    'ctor' : this.ctor,
+                    'props' : {
+                        'prop' : {'value': 1}
+                    }
+                }
+            };
+            var hypo = new Hypo(definitions);
+            var a = hypo.getEntity('a');
+            Y.assert(a.prop == num, "Simple properties should equal the passed value");
+        },
+        
+        testHypoPropertyAssignment : function(){
+            var definitions = {
+                'a' : {
+                    'ctor' : this.ctor,
+                    'props' : {
+                        'prop' : {'hypo':true}
+                    }
+                }
+            };
+            var hypo = new Hypo(definitions);
+            var a = hypo.getEntity('a');
+            Y.assert(a.prop == hypo, "Hypo properties should equal the hypo instance");
+        },
+        
+        testObjectPropertyAssignment : function(){
+            var obj = {};
+            var definitions = {
+                'a' : {
+                    'ctor' : this.ctor,
+                    'props' : {
+                        'prop' : {'value' : obj}
+                    }
+                }
+            };
+            var hypo = new Hypo(definitions);
+            var a = hypo.getEntity('a');
+            Y.assert(a.prop == obj, "Object properties should equla the passed object");
+        }
+    });
+    
+    var ConstructorArgumentTestCase = new Y.Test.Case({
+        name : 'Constructor Argument Test Case',
+        
+        setUp : function(){
+            this.ctor = function(arg){
+                this.arg = arg;
+            }
+        },
+        
+        tearDown : function(){
+            delete this.ctor;
+        },
+        
+        testConstructorEntityArgument : function(){
+            var definitions = {
+                'a' : {
+                    'ctor' : this.ctor,
+                    'ctorArgs' : [
+                        {'entity' : 'b'}
+                    ]
+                },
+                'b' : {
+                    'ctor' : this.ctor
+                }
+            };
+            var hypo = new Hypo(definitions);
+            var a = hypo.getEntity('a');
+            var b = hypo.getEntity('b');
+            Y.assert(a.arg == b, "Entity constructor arguments should equal the referenced entity");
+        },
+        
+        testConstructorSimpleArgument : function(){
+            var num = 1;
+            var definitions = {
+                'a' : {
+                    'ctor' : this.ctor,
+                    'ctorArgs' : [
+                        {'value': num}
+                    ]
+                }
+            };
+            var hypo = new Hypo(definitions);
+            var a = hypo.getEntity('a');
+            Y.assert(a.arg == num, "Simple constructor arguments should equal the passed value");
+        },
+        
+        testConstructorHypoArgument : function(){
+            var definitions = {
+                'a' : {
+                    'ctor' : this.ctor,
+                    'ctorArgs' : [
+                        {'hypo':true}
+                    ]
+                }
+            };
+            var hypo = new Hypo(definitions);
+            var a = hypo.getEntity('a');
+            Y.assert(a.arg == hypo, "Hypo constructor arguments should equal the hypo instance");
+        },
+        
+        testConstructorObjectArgument : function(){
+            var obj = {};
+            var definitions = {
+                'a' : {
+                    'ctor' : this.ctor,
+                    'ctorArgs' : [
+                        {'value' : obj}
+                    ]
+                }
+            };
+            var hypo = new Hypo(definitions);
+            var a = hypo.getEntity('a');
+            Y.assert(a.arg == obj, "Object constructor arguments should equla the passed object");
+        }
+    });
+
+    var HypoSuite = new Y.Test.Suite("Hypo Test Suite");
+
+    HypoSuite.add(getEntityTestCase);
+    HypoSuite.add(PropertyTestCase);
+    HypoSuite.add(ConstructorArgumentTestCase);
+    
+    Y.Test.Runner.subscribe(Y.Test.Runner.BEGIN_EVENT, logEvent);
+    Y.Test.Runner.subscribe(Y.Test.Runner.COMPLETE_EVENT, logEvent);
+    Y.Test.Runner.subscribe(Y.Test.Runner.TEST_CASE_BEGIN_EVENT, logEvent);
+    Y.Test.Runner.subscribe(Y.Test.Runner.TEST_CASE_COMPLETE_EVENT, logEvent);
+    Y.Test.Runner.subscribe(Y.Test.Runner.TEST_SUITE_BEGIN_EVENT, logEvent);
+    Y.Test.Runner.subscribe(Y.Test.Runner.TEST_SUITE_COMPLETE_EVENT, logEvent);
+    Y.Test.Runner.subscribe(Y.Test.Runner.TEST_PASS_EVENT, logEvent);
+    Y.Test.Runner.subscribe(Y.Test.Runner.TEST_FAIL_EVENT, logEvent);
+    Y.Test.Runner.subscribe(Y.Test.Runner.TEST_IGNORE_EVENT, logEvent);
+
+    Y.Test.Runner.add(HypoSuite);
+
+    Y.Test.Runner.run();
+});
+</script>
+
+</body>
+</html>

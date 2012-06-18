@@ -182,7 +182,7 @@
                 var def = this.parseDefinition(name),
                 parentDef, entity, args, i, ctor, context;
                 if(def.abstract)
-                    throw 'Hypo Error: "' + name + '" is an abstract entity, and cannot be retrieved.'
+                    throw new Error('Hypo Error: "' + name + '" is an abstract entity, and cannot be retrieved.');
                 if(!def.transient && this.singletonMap[name])
                     entity = this.singletonMap[name];
                 else{
@@ -199,7 +199,7 @@
                         args = def.factory.args;
                     }
                     else
-                        throw 'Hypo Error: Non-abstract entity "' + name + '" must have a ctor or factory defined.';
+                        throw new Error('Hypo Error: Non-abstract entity "' + name + '" must have a ctor or factory defined.');
                     entity = this.createEntity(ctor, args, name, context);
                     if(!def.transient)
                         this.singletonMap[name] = entity;
@@ -228,7 +228,7 @@
                 entityDef, ret, inst, i, j;
                 
                 if(typeof ctor != 'function')
-                    throw 'Hypo Error: Invalid ctor or factory method for "' + entityName + '".'; 
+                    throw new Error('Hypo Error: Invalid ctor or factory method for "' + entityName + '".'); 
                 if(argDefs)
                     for(i=0; i<argDefs.length; i++){
                         // Check for circular dependencies
@@ -341,7 +341,7 @@
                 key;
                 
                 if(!def)
-                    throw 'Hypo Error: Invalid entity name + "' + name + '".';
+                    throw new Error('Hypo Error: Invalid entity name + "' + name + '".');
                 if(def.parent && !def.parsed){
                     parent = this.parseDefinition(def.parent);
                     for(key in parent)

@@ -246,7 +246,7 @@
                 var def = this.parseDefinition(name),
                 parentDef, entity, args, i, ctor, context;
                 if(def.abstract)
-                    throw &#x27;Hypo Error: &quot;&#x27; + name + &#x27;&quot; is an abstract entity, and cannot be retrieved.&#x27;
+                    throw new Error(&#x27;Hypo Error: &quot;&#x27; + name + &#x27;&quot; is an abstract entity, and cannot be retrieved.&#x27;);
                 if(!def.transient &amp;&amp; this.singletonMap[name])
                     entity = this.singletonMap[name];
                 else{
@@ -263,7 +263,7 @@
                         args = def.factory.args;
                     }
                     else
-                        throw &#x27;Hypo Error: Non-abstract entity &quot;&#x27; + name + &#x27;&quot; must have a ctor or factory defined.&#x27;;
+                        throw new Error(&#x27;Hypo Error: Non-abstract entity &quot;&#x27; + name + &#x27;&quot; must have a ctor or factory defined.&#x27;);
                     entity = this.createEntity(ctor, args, name, context);
                     if(!def.transient)
                         this.singletonMap[name] = entity;
@@ -292,7 +292,7 @@
                 entityDef, ret, inst, i, j;
                 
                 if(typeof ctor != &#x27;function&#x27;)
-                    throw &#x27;Hypo Error: Invalid ctor or factory method for &quot;&#x27; + entityName + &#x27;&quot;.&#x27;; 
+                    throw new Error(&#x27;Hypo Error: Invalid ctor or factory method for &quot;&#x27; + entityName + &#x27;&quot;.&#x27;); 
                 if(argDefs)
                     for(i=0; i&lt;argDefs.length; i++){
                         &#x2F;&#x2F; Check for circular dependencies
@@ -405,7 +405,7 @@
                 key;
                 
                 if(!def)
-                    throw &#x27;Hypo Error: Invalid entity name + &quot;&#x27; + name + &#x27;&quot;.&#x27;;
+                    throw new Error(&#x27;Hypo Error: Invalid entity name + &quot;&#x27; + name + &#x27;&quot;.&#x27;);
                 if(def.parent &amp;&amp; !def.parsed){
                     parent = this.parseDefinition(def.parent);
                     for(key in parent)
