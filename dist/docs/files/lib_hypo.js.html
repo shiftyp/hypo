@@ -212,7 +212,7 @@
                 entityDef, ret, inst, i, j;
                 
                 if(typeof ctor != &#x27;function&#x27;)
-                    throw new Error(&#x27;Invalid ctor or factory method for &quot;&#x27; + entityName + &#x27;&quot;.&#x27;); 
+                    throw new this.HypoError(&#x27;Invalid ctor or factory method for &quot;&#x27; + entityName + &#x27;&quot;.&#x27;); 
                 if(argDefs)
                     for(i=0; i&lt;argDefs.length; i++){
                         &#x2F;&#x2F; Check for circular dependencies
