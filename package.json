@@ -27,6 +27,6 @@
     "devDependencies" : {
         "commander" : ">=0.6.1",
         "uglify-js" : ">=1.3.0",
-        "yuidoc" : ">=0.3.14"
+        "yuidocjs" : ">=0.3.14"
     }
 }
