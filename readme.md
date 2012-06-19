@@ -123,8 +123,6 @@ var f = hypo.getEntity('f');
 
 ## TODO
 
-* Add better circular dependency checking for constructor and factory arguments.
-Currently the framework only does a shallow check, it should do a full recursive check.
 * Test coverage is not 100% complete.  Tests need to be added for various framework errors,
 and for the parent entity functionality.
 

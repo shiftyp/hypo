@@ -266,7 +266,8 @@ YUI().use("test", "console", function (Y) {
         
         _should : {
             error : {
-                testConstructorCircularArgument : Hypo.prototype.HypoError
+                testConstructorCircularArgument : Hypo.prototype.HypoError,
+                testRecursiveConstructorCircularArgument : Hypo.prototype.HypoError
             }
         },
         
@@ -348,6 +349,30 @@ YUI().use("test", "console", function (Y) {
                 }
             };
             var hypo = new Hypo(definitions);
+        },
+        
+        testRecursiveConstructorCircularArgument : function(){
+            var definitions = {
+                'a' : {
+                    'ctor' : this.ctor,
+                    'args' : [
+                        {'entity' : 'c'}
+                    ]
+                },
+                'b' : {
+                    'ctor' : this.ctor,
+                    'args' : [
+                        {'entity': 'a'}
+                    ]
+                },
+                'c' : {
+                    'ctor' : this.ctor,
+                    'args' : [
+                        {'entity': 'b'}
+                    ]
+                }
+            };
+            var hypo = new Hypo(definitions);
         }
     });
     
@@ -372,6 +397,7 @@ YUI().use("test", "console", function (Y) {
         
         _should : {
             error : {
+                testFactoryCircularContext : Hypo.prototype.HypoError,
                 testFactoryCircularArgument : Hypo.prototype.HypoError
             }
         },
@@ -485,16 +511,13 @@ YUI().use("test", "console", function (Y) {
             Y.assert(a.arg == obj, "Object factory arguments should equal the passed object");
         },
         
-        testFactoryCircularArgument : function(){
+        testFactoryCircularContext : function(){
             var method = 'method';
             var definitions = {
                 'a' : {
                     'factory' : {
                         'context' : 'factory',
-                        'method' : method,
-                        'args' : [
-                            {'entity': 'b'}
-                        ]
+                        'method' : method
                     }
                 },
                 'factory' : {
@@ -505,10 +528,35 @@ YUI().use("test", "console", function (Y) {
                 }
             }
             var hypo = new Hypo(definitions);
+        },
+        
+        testFactoryRecursiveCircularContext : function(){
+            var method = 'method';
+            var definitions = {
+                'a' : {
+                    'factory' : {
+                        'context' : 'factory',
+                        'method' : method
+                    }
+                },
+                'factory' : {
+                    'ctor' : this.factoryCtor,
+                    'args' : [
+                        {'entity' : 'b'}
+                    ]
+                },
+                'b' : {
+                    'ctor' : this.factoryCtor,
+                    'args' : [
+                        {'entity' : 'a'}
+                    ]
+                }
+            }
+            var hypo = new Hypo(definitions);
         }
     });
 
-    var ParentTestSuite = new Y.Test.Case({
+    var ParentTestCase = new Y.Test.Case({
         name : 'Parent Test Case',
         
         setUp : function(){

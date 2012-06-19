@@ -129,7 +129,7 @@
         },
         {
             "file": "lib\\hypo.js",
-            "line": 163,
+            "line": 169,
             "description": "Applies properties to an entity instance based on the passed set of\nproperty definitions.  See parseProperty for a description of\nappropriate Hypo property definitions.",
             "itemtype": "method",
             "name": "applyProperties",
@@ -149,7 +149,7 @@
         },
         {
             "file": "lib\\hypo.js",
-            "line": 180,
+            "line": 186,
             "description": "Parses Hypo property definitions.  These definitions are used for\nconstructor arguments, factory arguments, and property definitions.\nValid property objects are as follows:",
             "example": [
                 "\nPassing an object with a hypo key returns a reference to the Hypo instance\n\n    {\n        hypo : true    \n    }\n      \nPassing an object with an entity key equal to an entity name returns an entity\ninstance.\n\n    {\n        entity : \"entity name\"\n    }\n      \nPassing an object with a key \"value\" returns that value.\n\n    {\n        value : \"object or primitive value\"\n    }\n      \nAny other object configuration will result in an error being thrown."
@@ -170,7 +170,7 @@
         },
         {
             "file": "lib\\hypo.js",
-            "line": 227,
+            "line": 233,
             "description": "Parses the definition for the passed name, including recursing through\nany parent definitions, and merging parent and child properties where\nneeded.",
             "itemtype": "method",
             "name": "parseDefinition",
