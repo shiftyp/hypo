@@ -119,7 +119,9 @@ YUI().use("test", "console", function (Y) {
         
         _should : {
             error : {
-                "Abstract Entity Creation" : Hypo.prototype.HypoError
+                "Abstract Entity Creation" : Hypo.prototype.HypoError,
+                "No Entity Constructor" : Hypo.prototype.HypoError,
+                "Bad Entity Name" : Hypo.prototype.HypoError
             }
         },
         
@@ -176,6 +178,18 @@ YUI().use("test", "console", function (Y) {
                 }
             };
             var hypo = new Hypo(definitions);
+            hypo.getEntity('a');
+        },
+        
+        "No Entity Constructor" : function(){
+            var definitions = {
+                'a' : {}
+            }
+            var hypo = new Hypo(definitions);
+        },
+        
+        "Bad Entity Name" : function(){
+            var hypo = new Hypo({});
             hypo.getEntity('a');
         }
     });
