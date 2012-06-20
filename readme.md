@@ -121,11 +121,6 @@ var d = hypo.getEntity('d');
 var f = hypo.getEntity('f');
 ```
 
-## TODO
-
-* Test coverage is not 100% complete.  Tests need to be added for various framework errors,
-and for the parent entity functionality.
-
 ## Development
 
 To build hypo you need to install [nodejs](http://nodejs.org/).  Then
