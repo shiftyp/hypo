@@ -3,7 +3,7 @@
 <html>
 <head>
     <title>Hypo Tests</title>
-    <script type="text/javascript" src="http://yui.yahooapis.com/3.2.0/build/yui/yui-min.js"></script>
+    <script type="text/javascript" src="http://yui.yahooapis.com/3.5.1/build/yui/yui-min.js"></script>
     <script type="text/javascript" src="../dist/hypo.src.js"></script>
     <style type="text/css">
     .yui3-skin-sam .yui3-console-entry-pass .yui3-console-entry-cat {
@@ -119,11 +119,11 @@ YUI().use("test", "console", function (Y) {
         
         _should : {
             error : {
-                testAbstractCreation : Hypo.prototype.HypoError
+                "Abstract Entity Creation" : Hypo.prototype.HypoError
             }
         },
         
-        testSingletonCreation : function () {
+        "Singleton Entity Creation" : function () {
             var definitions = {
                 'a' : {
                     'ctor' : this.ctor
@@ -132,14 +132,14 @@ YUI().use("test", "console", function (Y) {
             var hypo = new Hypo(definitions);
             var a1 = hypo.getEntity('a');
             var a2 = hypo.getEntity('a');
-            Y.assert(a1 instanceof this.ctor, "Entity should be instance of ctor");
-            Y.assert(a2 instanceof this.ctor, "Entity should be instance of ctor");
-            Y.assert(a1 == a2, "Singleton entities should only be created once");
+            Y.Assert.isInstanceOf(this.ctor, a1, "Entity should be instance of ctor");
+            Y.Assert.isInstanceOf(this.ctor, a2, "Entity should be instance of ctor");
+            Y.Assert.areEqual(a1, a2, "Singleton entities should only be created once");
             Y.assert(hypo.singletonMap.hasOwnProperty('a'), "The entity name should exist in the entity map");
-            Y.assert(hypo.singletonMap.a = a1, "The entity in the singletonMap should equal the entity returned from getEntity");
+            Y.Assert.areEqual(hypo.singletonMap.a, a1, "The entity in the singletonMap should equal the entity returned from getEntity");
         },
         
-        testLazyCreation : function(){
+        "Lazy Entity Creation" : function(){
             var definitions = {
                 'a' : {
                     'lazy' : true,
@@ -149,10 +149,11 @@ YUI().use("test", "console", function (Y) {
             var hypo = new Hypo(definitions);
             Y.assert(!hypo.singletonMap.hasOwnProperty('a'), "Lazy entities should not exist after hypo instantiation");
             var a = hypo.getEntity('a');
+            Y.Assert.isInstanceOf(this.ctor, a, "Entity should be instance of ctor");
             Y.assert(hypo.singletonMap.hasOwnProperty('a'), "Lazy entities should be added to the singleton map after creation");
         },
         
-        testTransientCreation : function(){
+        "Transient Entity Creation" : function(){
             var definitions = {
                 'a' : {
                     'transient' : true,
@@ -162,11 +163,13 @@ YUI().use("test", "console", function (Y) {
             var hypo = new Hypo(definitions);
             var a1 = hypo.getEntity('a');
             var a2 = hypo.getEntity('a');
-            Y.assert(a1 != a2, "Transient entities retrieved seperately should not be equal");
+            Y.Assert.isInstanceOf(this.ctor, a1, "Entity should be instance of ctor");
+            Y.Assert.isInstanceOf(this.ctor, a2, "Entity should be instance of ctor");
+            Y.Assert.areNotEqual(a1, a2, "Transient entities retrieved seperately should not be equal");
             Y.assert(!hypo.singletonMap.hasOwnProperty('a'), "Transient entities should not be added to the singletonMap");
         },
         
-        testAbstractCreation : function(){
+        "Abstract Entity Creation" : function(){
             var definitions = {
                 'a' : {
                     'abstract' : true
@@ -188,7 +191,13 @@ YUI().use("test", "console", function (Y) {
             delete this.ctor;
         },
         
-        testEntityPropertyAssignment : function(){
+        _should : {
+            error : {
+                "Bad Property Assignment" : Hypo.prototype.HypoError
+            }
+        },
+        
+        "Entity Property Assignment" : function(){
             var definitions = {
                 'a' : {
                     'ctor' : this.ctor,
@@ -203,10 +212,10 @@ YUI().use("test", "console", function (Y) {
             var hypo = new Hypo(definitions);
             var a = hypo.getEntity('a');
             var b = hypo.getEntity('b');
-            Y.assert(a.prop == b, "Entity properties should equal the referenced entity");
+            Y.Assert.areEqual(a.prop, b, "Entity properties should equal the referenced entity");
         },
         
-        testSimplePropertyAssignment : function(){
+        "Simple Property Assignment" : function(){
             var num = 1;
             var definitions = {
                 'a' : {
@@ -218,10 +227,10 @@ YUI().use("test", "console", function (Y) {
             };
             var hypo = new Hypo(definitions);
             var a = hypo.getEntity('a');
-            Y.assert(a.prop == num, "Simple properties should equal the passed value");
+            Y.Assert.areSame(a.prop, num, "Simple properties should equal the passed value");
         },
         
-        testHypoPropertyAssignment : function(){
+        "Hypo Property Assignment" : function(){
             var definitions = {
                 'a' : {
                     'ctor' : this.ctor,
@@ -232,10 +241,10 @@ YUI().use("test", "console", function (Y) {
             };
             var hypo = new Hypo(definitions);
             var a = hypo.getEntity('a');
-            Y.assert(a.prop == hypo, "Hypo properties should equal the hypo instance");
+            Y.Assert.areEqual(a.prop, hypo, "Hypo properties should equal the hypo instance");
         },
         
-        testObjectPropertyAssignment : function(){
+        "Object Property Assignment" : function(){
             var obj = {};
             var definitions = {
                 'a' : {
@@ -247,7 +256,19 @@ YUI().use("test", "console", function (Y) {
             };
             var hypo = new Hypo(definitions);
             var a = hypo.getEntity('a');
-            Y.assert(a.prop == obj, "Object properties should equla the passed object");
+            Y.Assert.areEqual(a.prop, obj, "Object properties should equla the passed object");
+        },
+        
+        "Bad Property Assignment" : function(){
+            var definitions = {
+                'a' : {
+                    'ctor' : this.ctor,
+                    'props' : {
+                        'foo' : {'bar' : 'baz'}
+                    }
+                }
+            }
+            var hypo = new Hypo(definitions);
         }
     });
     
@@ -266,12 +287,12 @@ YUI().use("test", "console", function (Y) {
         
         _should : {
             error : {
-                testConstructorCircularArgument : Hypo.prototype.HypoError,
-                testRecursiveConstructorCircularArgument : Hypo.prototype.HypoError
+                "Circular Constructor Argument" : Hypo.prototype.HypoError,
+                "Recursive Circular Constructor Argument" : Hypo.prototype.HypoError
             }
         },
         
-        testConstructorEntityArgument : function(){
+        "Entity Constructor Argument" : function(){
             var definitions = {
                 'a' : {
                     'ctor' : this.ctor,
@@ -286,10 +307,10 @@ YUI().use("test", "console", function (Y) {
             var hypo = new Hypo(definitions);
             var a = hypo.getEntity('a');
             var b = hypo.getEntity('b');
-            Y.assert(a.arg == b, "Entity constructor arguments should equal the referenced entity");
+            Y.Assert.areEqual(a.arg, b, "Entity constructor arguments should equal the referenced entity");
         },
         
-        testConstructorSimpleArgument : function(){
+        "Simple Constructor Argument" : function(){
             var num = 1;
             var definitions = {
                 'a' : {
@@ -301,10 +322,10 @@ YUI().use("test", "console", function (Y) {
             };
             var hypo = new Hypo(definitions);
             var a = hypo.getEntity('a');
-            Y.assert(a.arg == num, "Simple constructor arguments should equal the passed value");
+            Y.Assert.areSame(a.arg, num, "Simple constructor arguments should equal the passed value");
         },
         
-        testConstructorHypoArgument : function(){
+        "Hypo Constructor Argument" : function(){
             var definitions = {
                 'a' : {
                     'ctor' : this.ctor,
@@ -315,10 +336,10 @@ YUI().use("test", "console", function (Y) {
             };
             var hypo = new Hypo(definitions);
             var a = hypo.getEntity('a');
-            Y.assert(a.arg == hypo, "Hypo constructor arguments should equal the hypo instance");
+            Y.Assert.areEqual(a.arg, hypo, "Hypo constructor arguments should equal the hypo instance");
         },
         
-        testConstructorObjectArgument : function(){
+        "Object Constructor Argument" : function(){
             var obj = {};
             var definitions = {
                 'a' : {
@@ -330,10 +351,10 @@ YUI().use("test", "console", function (Y) {
             };
             var hypo = new Hypo(definitions);
             var a = hypo.getEntity('a');
-            Y.assert(a.arg == obj, "Object constructor arguments should equla the passed object");
+            Y.Assert.areEqual(a.arg, obj, "Object constructor arguments should equla the passed object");
         },
         
-        testConstructorCircularArgument : function(){
+        "Circular Constructor Argument" : function(){
             var definitions = {
                 'a' : {
                     'ctor' : this.ctor,
@@ -351,7 +372,7 @@ YUI().use("test", "console", function (Y) {
             var hypo = new Hypo(definitions);
         },
         
-        testRecursiveConstructorCircularArgument : function(){
+        "Recursive Circular Constructor Argument" : function(){
             var definitions = {
                 'a' : {
                     'ctor' : this.ctor,
@@ -397,12 +418,13 @@ YUI().use("test", "console", function (Y) {
         
         _should : {
             error : {
-                testFactoryCircularContext : Hypo.prototype.HypoError,
-                testFactoryRecursiveCircularContext : Hypo.prototype.HypoError
+                "Bad Factory Argument" : Hypo.prototype.HypoError,
+                "Circular Factory Context" : Hypo.prototype.HypoError,
+                "Recursive Circular Factory Context" : Hypo.prototype.HypoError
             }
         },
         
-        testConcreteFactory : function(){
+        "Concrete Factory" : function(){
             var method = 'method';
             var definitions = {
                 'a' : {
@@ -416,13 +438,14 @@ YUI().use("test", "console", function (Y) {
             var a = hypo.getEntity('a');
         },
         
-        testEntityFactory : function(){
+        "Entity Factory" : function(){
             var method = 'method';
             var definitions = {
                 'a' : {
                     'factory' : {
                         'context' : 'factory',
-                        'method' : method
+                        'method' : method,
+                        
                     }
                 },
                 'factory' : {
@@ -433,7 +456,7 @@ YUI().use("test", "console", function (Y) {
             var a = hypo.getEntity('a');
         },
         
-        testFactoryEntityArgument : function(){
+        "Entity Factory Argument" : function(){
             var method = 'method';
             var definitions = {
                 'a' : {
@@ -452,10 +475,10 @@ YUI().use("test", "console", function (Y) {
             var hypo = new Hypo(definitions);
             var a = hypo.getEntity('a');
             var b = hypo.getEntity('b');
-            Y.assert(a.arg == b, "Entity factory arguments should equal the referenced entity");
+            Y.Assert.areEqual(a.arg, b, "Entity factory arguments should equal the referenced entity");
         },
         
-        testFactorySimpleArgument : function(){
+        "Simple Factory Argument" : function(){
             var method = 'method';
             var num = 1;
             var definitions = {
@@ -471,10 +494,10 @@ YUI().use("test", "console", function (Y) {
             }
             var hypo = new Hypo(definitions);
             var a = hypo.getEntity('a');
-            Y.assert(a.arg == num, "Simple factory arguments should equal the passed value");
+            Y.Assert.areEqual(a.arg, num, "Simple factory arguments should equal the passed value");
         },
         
-        testFactoryHypoArgument : function(){
+        "Hypo Factory Argument" : function(){
             var method = 'method';
             var definitions = {
                 'a' : {
@@ -489,10 +512,10 @@ YUI().use("test", "console", function (Y) {
             }
             var hypo = new Hypo(definitions);
             var a = hypo.getEntity('a');
-            Y.assert(a.arg == hypo, "Hypo factory arguments should equal the hypo instance");
+            Y.Assert.areEqual(a.arg, hypo, "Hypo factory arguments should equal the hypo instance");
         },
         
-        testFactoryObjectArgument : function(){
+        "Object Factory Argument" : function(){
             var method = 'method';
             var obj = {}
             var definitions = {
@@ -508,10 +531,27 @@ YUI().use("test", "console", function (Y) {
             }
             var hypo = new Hypo(definitions);
             var a = hypo.getEntity('a');
-            Y.assert(a.arg == obj, "Object factory arguments should equal the passed object");
+            Y.Assert.areEqual(a.arg, obj, "Object factory arguments should equal the passed object");
         },
         
-        testFactoryCircularContext : function(){
+        "Bad Factory Argument" : function(){
+            var method = 'method';
+            var obj = {}
+            var definitions = {
+                'a' : {
+                    'factory' : {
+                        'context' : this.factory,
+                        'method' : method,
+                        'args' : [
+                            {'foo': 'bar'}
+                        ]
+                    }
+                }
+            }
+            var hypo = new Hypo(definitions);
+        },
+        
+        "Circular Factory Context" : function(){
             var method = 'method';
             var definitions = {
                 'a' : {
@@ -530,7 +570,7 @@ YUI().use("test", "console", function (Y) {
             var hypo = new Hypo(definitions);
         },
         
-        testFactoryRecursiveCircularContext : function(){
+        "Recursive Circular Factory Context" : function(){
             var method = 'method';
             var definitions = {
                 'a' : {
@@ -569,7 +609,98 @@ YUI().use("test", "console", function (Y) {
             delete this.ctor;
         },
         
-        // TODO
+        "Singleton Parent Entity Test" : function(){
+            var definitions = {
+                'a' : {
+                    'ctor' : this.ctor
+                },
+                'b' : {
+                    'parent' : 'a'
+                }
+            };
+            var hypo = new Hypo(definitions);
+            Y.Assert.isInstanceOf(this.ctor, hypo.getEntity('b'), "Child entity should inherit the constructor of the parent entity");
+        },
+        "Transient Parent Entity Test" : function(){
+            var definitions = {
+                'a' : {
+                    'transient' : true,
+                    'ctor' : this.ctor
+                },
+                'b' : {
+                    'parent' : 'a'
+                }
+            };
+            var hypo = new Hypo(definitions);
+            var b1 = hypo.getEntity('b');
+            var b2 = hypo.getEntity('b');
+            Y.Assert.isInstanceOf(this.ctor, b1, "Child entity should inherit the constructor of the parent entity");
+            Y.Assert.areNotEqual(b1, b2, "Child entities should inherit transient status from the parent entity");
+        },
+        'Abstract Parent Entity Test' : function(){
+            var num = 1;
+            var definitions = {
+                'a' : {
+                    'abstract' : true,
+                    'props' : {
+                        'num' : {'value' : num}
+                    }
+                },
+                'b' : {
+                    'ctor' : this.ctor,
+                    'parent' : 'a'
+                }
+            };
+            var hypo = new Hypo(definitions);
+            var b = hypo.getEntity('b');
+            Y.Assert.areSame(b.num, num, "Child entity should inherit the properties of the parent entity");
+        },
+        'Recursive Parent Entity Test' : function(){
+            var num = 1;
+            var definitions = {
+                'a' : {
+                    'abstract' : true,
+                    'props' : {
+                        'num' : {'value' : num}
+                    }
+                },
+                'b' : {
+                    'abstract' : true,
+                    'parent' : 'a'
+                },
+                'c' : {
+                    'ctor' : this.ctor,
+                    'parent' : 'b'
+                }
+            };
+            var hypo = new Hypo(definitions);
+            var c = hypo.getEntity('c');
+            Y.Assert.areSame(c.num, num, "Child entity should inherit the properties of the parent entity");
+        },
+        'Parent Entity Properties Test' : function(){
+            var num1 = 1;
+            var num2 = 2;
+            var definitions = {
+                'a' : {
+                    'abstract' : true,
+                    'props' : {
+                        'num1' : {'value' : num1}
+                    }
+                },
+                'b' : {
+                    'ctor' : this.ctor,
+                    'parent' : 'a',
+                    'props' : {
+                        'num1' : {'value' : num2},
+                        'num2' : {'value': num2}
+                    }
+                }
+            };
+            var hypo = new Hypo(definitions);
+            var b = hypo.getEntity('b');
+            Y.Assert.areSame(b.num1, num2, "Child entity should override the properties of the parent entity");
+            Y.Assert.areSame(b.num2, num2, "Properties from the child entity should be merged with those from the parent entity");
+        }
     });
     
     var HypoSuite = new Y.Test.Suite("Hypo Test Suite");
