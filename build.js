@@ -30,7 +30,7 @@ function compile(){
 	var jsp = uglify.parser;
 	var pro = uglify.uglify;
 	var ast = jsp.parse(src);
-	ast = pro.ast_mangle(ast);
+	ast = pro.ast_mangle(ast, {mangle:true});
 	ast = pro.ast_squeeze(ast);
 	var min = license + pro.gen_code(ast);
 	src = license + src;
